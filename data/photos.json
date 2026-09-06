@@ -25,11 +25,13 @@
  },
  "지리산천왕봉": {
   "file": "지리산천왕봉.jpg",
-  "title": "Jirisan National Park4.jpg",
-  "author": "The original uploader was Shamus7792003 at English Wikipedia.",
-  "license": "Public domain",
+  "title": "IMG_3309.HEIC",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
   "license_url": "",
-  "source": "https://commons.wikimedia.org/wiki/File%3AJirisan_National_Park4.jpg"
+  "source": "",
+  "own": true,
+  "date": "2025-10-25"
  },
  "무등산": {
   "file": "무등산.jpg",
