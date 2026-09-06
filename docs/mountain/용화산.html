@@ -8,7 +8,7 @@
 <meta property="og:title" content="용화산 878m — 코스·난이도·인증장소 | 블랙야크 100대 명산 기록">
 <meta property="og:description" content="878m. 큰고개까지 차로 오르면 정상이 코앞. 100대 명산 중 가장 손쉽게 인증할 수 있는 산으로 꼽힙니다.">
 <meta property="og:type" content="article">
-<link rel="stylesheet" href="../assets/style.757c2003.css">
+<link rel="stylesheet" href="../assets/style.2a6a0d4d.css">
 
 </head>
 <body>
@@ -100,7 +100,56 @@
   <p><a class="foot-link" href="../credits.html">사진 출처</a>
      <a class="foot-link" href="../guestbook.html">방명록</a></p>
   <p class="muted">본문의 코스·시간·교통 정보는 작성 시점 기준입니다. 산행 전 국립공원공단·지자체 공지와 기상 상황을 반드시 확인하세요.</p>
+  <p class="visits" id="visits" hidden></p>
 </footer>
 <script src="../assets/app.cc32f1dd.js"></script>
+<script type="module">
+import { initializeApp, getApps, getApp } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, increment } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// 한 페이지에 Firebase 스크립트가 둘 이상 있을 수 있다(첫 화면은 방문자 수와
+// 내려받기 수를 함께 쓴다). 두 번 초기화하면 오류가 나므로 이미 있으면 쓴다.
+const cfg = {"apiKey": "AIzaSyAQzTXDp_eWdhR_XNxIpouXV85QPnnvvkc", "authDomain": "bac100-89748.firebaseapp.com", "projectId": "bac100-89748", "storageBucket": "bac100-89748.firebasestorage.app", "messagingSenderId": "826068803130", "appId": "1:826068803130:web:edc509ea1e5e0041b6df03"};
+const db = getFirestore(getApps().length ? getApp() : initializeApp(cfg));
+
+const el = document.getElementById('visits');
+const today = new Date().toLocaleDateString('sv-SE');   // YYYY-MM-DD (한국 시각 기준 지역설정)
+const totalRef = doc(db, 'stats/visits');
+const dayRef = doc(db, 'stats/visits-' + today);
+
+function show(day, total) {
+  if (!el || !(total > 0)) return;
+  const n = (v) => v.toLocaleString('ko-KR');
+  el.textContent = (day > 0 ? '오늘 ' + n(day) + '명 · ' : '') + '전체 ' + n(total) + '명이 다녀갔습니다';
+  el.hidden = false;
+}
+
+async function read() {
+  try {
+    const [t, d] = await Promise.all([getDoc(totalRef), getDoc(dayRef)]);
+    show(d.exists() ? d.data().count : 0, t.exists() ? t.data().count : 0);
+  } catch (err) { /* 숫자를 못 읽어도 페이지는 멀쩡해야 한다 */ }
+}
+
+async function count() {
+  let already = false;
+  try {
+    already = localStorage.getItem('BAC100_VISIT') === today;   // 하루 한 번만
+    if (!already) localStorage.setItem('BAC100_VISIT', today);
+  } catch (err) { /* 저장이 막힌 브라우저면 그냥 센다 */ }
+  if (already) return read();
+  try {
+    await Promise.all([
+      setDoc(totalRef, { count: increment(1) }, { merge: true }),
+      setDoc(dayRef, { count: increment(1) }, { merge: true }),
+    ]);
+  } catch (err) { /* 세는 데 실패해도 그만 */ }
+  read();
+}
+
+count();
+</script>
 </body>
 </html>

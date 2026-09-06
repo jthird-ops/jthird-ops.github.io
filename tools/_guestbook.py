@@ -70,13 +70,14 @@ def js(cfg):
     if not cfg:
         return ''
     return f"""<script type="module">
-import {{ initializeApp }} from
+import {{ initializeApp, getApps, getApp }} from
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {{ getFirestore, collection, addDoc, getDocs, query, orderBy, limit,
          serverTimestamp }} from
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const db = getFirestore(initializeApp({json.dumps(cfg, ensure_ascii=False)}));
+const cfg = {json.dumps(cfg, ensure_ascii=False)};
+const db = getFirestore(getApps().length ? getApp() : initializeApp(cfg));
 const listEl = document.getElementById('gb-list');
 const form = document.getElementById('gb-form');
 const box = document.getElementById('gb-msgbox');

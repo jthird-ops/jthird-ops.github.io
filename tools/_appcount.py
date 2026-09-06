@@ -23,12 +23,14 @@ def js(cfg):
     if not cfg:
         return ''
     return f"""<script type="module">
-import {{ initializeApp }} from
+import {{ initializeApp, getApps, getApp }} from
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {{ getFirestore, doc, getDoc, setDoc, increment }} from
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const db = getFirestore(initializeApp({json.dumps(cfg, ensure_ascii=False)}));
+// 같은 페이지의 다른 스크립트가 이미 초기화했을 수 있다
+const cfg = {json.dumps(cfg, ensure_ascii=False)};
+const db = getFirestore(getApps().length ? getApp() : initializeApp(cfg));
 const ref = doc(db, '{DOC}');
 const el = document.getElementById('app-count');
 

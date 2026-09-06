@@ -505,3 +505,5 @@ img.app-shot{border:1px solid #dfe3e8}
 .app-about-txt p{margin:0 0 11px;font-size:14px;line-height:1.8}
 .app-about-note{color:var(--sub);font-size:13px!important}
 @media(max-width:760px){.app-about-grid{grid-template-columns:1fr}}
+
+.visits{margin:10px 0 0!important;font-size:12px;color:var(--sub);opacity:.9}

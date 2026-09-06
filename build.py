@@ -16,6 +16,10 @@ OUT = os.path.join(ROOT, 'docs')
 # 이름이 내용에 따라 달라져야 브라우저가 예전 파일을 계속 쓰지 않는다.
 ASSET = {'css': 'assets/style.css', 'js': 'assets/app.js'}
 
+# 방문자 수 스크립트. main() 에서 채운다. Firebase 설정이 없으면 빈 문자열이라
+# 아무것도 실리지 않는다.
+VISITS = {'js': '', 'html': ''}
+
 SITE = "블랙야크 100대 명산 기록"
 TAGLINE = "100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에"
 
@@ -267,8 +271,10 @@ def page(title, body, depth=0, desc="", extra_head=""):
   <p><a class="foot-link" href="{up}credits.html">사진 출처</a>
      <a class="foot-link" href="{up}guestbook.html">방명록</a></p>
   <p class="muted">본문의 코스·시간·교통 정보는 작성 시점 기준입니다. 산행 전 국립공원공단·지자체 공지와 기상 상황을 반드시 확인하세요.</p>
+  {VISITS['html']}
 </footer>
 <script src="{up}{ASSET['js']}"></script>
+{VISITS['js']}
 </body>
 </html>
 """
@@ -1410,7 +1416,7 @@ JS = r"""
 # ---------------------------------------------------------------- 실행
 def main():
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
-    import _guestbook, _appcount, _appshot
+    import _guestbook, _appcount, _appshot, _visits
     mts = load()
     kmap = load_map()
     photos = load_photos()
@@ -1443,7 +1449,12 @@ def main():
         open(os.path.join(OUT, f'assets/{name}'), 'w', encoding='utf-8').write(text)
         ASSET[kind] = rel
 
-    put('css', 'style.css', CSS + _guestbook.CSS + _appcount.CSS + _appshot.CSS)
+    gb_cfg0 = _guestbook.config()
+    VISITS['js'] = _visits.js(gb_cfg0)
+    VISITS['html'] = _visits.html() if gb_cfg0 else ''
+
+    put('css', 'style.css',
+        CSS + _guestbook.CSS + _appcount.CSS + _appshot.CSS + _visits.CSS)
     put('js', 'app.js', JS)
 
     # GitHub Pages 가 사이트를 Jekyll 로 다시 가공하지 않게 한다.
