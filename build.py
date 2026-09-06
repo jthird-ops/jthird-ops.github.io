@@ -12,6 +12,10 @@ import json, os, shutil, html, hashlib, datetime, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'docs')
+# 스타일·스크립트 파일 이름. main() 에서 내용 해시를 붙인 이름으로 바꾼다.
+# 이름이 내용에 따라 달라져야 브라우저가 예전 파일을 계속 쓰지 않는다.
+ASSET = {'css': 'assets/style.css', 'js': 'assets/app.js'}
+
 SITE = "블랙야크 100대 명산 기록"
 TAGLINE = "100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에"
 
@@ -226,7 +230,7 @@ def page(title, body, depth=0, desc="", extra_head=""):
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc or TAGLINE)}">
 <meta property="og:type" content="article">
-<link rel="stylesheet" href="{up}assets/style.css">
+<link rel="stylesheet" href="{up}{ASSET['css']}">
 {extra_head}
 </head>
 <body>
@@ -264,7 +268,7 @@ def page(title, body, depth=0, desc="", extra_head=""):
      <a class="foot-link" href="{up}guestbook.html">방명록</a></p>
   <p class="muted">본문의 코스·시간·교통 정보는 작성 시점 기준입니다. 산행 전 국립공원공단·지자체 공지와 기상 상황을 반드시 확인하세요.</p>
 </footer>
-<script src="{up}assets/app.js"></script>
+<script src="{up}{ASSET['js']}"></script>
 </body>
 </html>
 """
@@ -1421,9 +1425,23 @@ def main():
         fp = os.path.join(src_assets, fn)
         if os.path.isfile(fp):
             shutil.copy2(fp, os.path.join(OUT, 'assets', fn))
-    open(os.path.join(OUT, 'assets/style.css'), 'w', encoding='utf-8').write(
-        CSS + _guestbook.CSS + _appcount.CSS + _appshot.CSS)
-    open(os.path.join(OUT, 'assets/app.js'), 'w', encoding='utf-8').write(JS)
+    def put(kind, name, text):
+        """내용 해시를 파일 이름에 넣는다.
+
+        style.css 처럼 이름이 고정이면, 내용을 고쳐도 브라우저가 예전 파일을
+        계속 쓴다. 이름이 바뀌면 무조건 새로 받는다."""
+        h = hashlib.md5(text.encode('utf-8')).hexdigest()[:8]
+        base, ext = name.rsplit('.', 1)
+        rel = f'assets/{base}.{h}.{ext}'
+        open(os.path.join(OUT, rel), 'w', encoding='utf-8').write(text)
+        ASSET[kind] = rel
+
+    put('css', 'style.css', CSS + _guestbook.CSS + _appcount.CSS + _appshot.CSS)
+    put('js', 'app.js', JS)
+
+    # GitHub Pages 가 사이트를 Jekyll 로 다시 가공하지 않게 한다.
+    # docs/ 를 통째로 다시 만들기 때문에 빌드할 때마다 새로 놓아야 한다.
+    open(os.path.join(OUT, '.nojekyll'), 'w').close()
 
     src_app = os.path.join(ROOT, 'app')          # 정복 어플(PWA)
     if os.path.isdir(src_app):
