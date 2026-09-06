@@ -8,7 +8,8 @@
   1. 산 목록(이름·높이·지역·좌표)을 블로그 데이터로 통째로 교체
   2. 지역 칩을 블로그의 지역 구분에 맞춤
   3. 배경 지도(base64 JPEG)를 블로그의 시도별 SVG 로 교체
-  4. 내려받아 혼자 쓰는 한 파일짜리 판을 따로 만든다
+  4. 좁은 화면용 레이아웃을 덧붙인다 (원본에는 미디어쿼리가 없다)
+  5. 내려받아 혼자 쓰는 한 파일짜리 판을 따로 만든다
 """
 import io, json, os, re
 
@@ -21,6 +22,35 @@ REGION_ORDER = ["서울", "인천", "경기", "강원", "충북", "충남",
 FILLS = {'서울': '#dbe3f2', '인천': '#e9f0f6', '경기': '#e0eaf7', '강원': '#dfeee4',
          '충북': '#f6f0dc', '충남': '#fae7db', '경북': '#e8e3f4', '경남': '#dcecf2',
          '전북': '#f5ecdf', '전남': '#dff0e8', '지리산': '#eae4f3', '제주도': '#f4e5f2'}
+
+
+
+MOBILE_CSS = """
+  /* 어플 원본에는 미디어쿼리가 없다. 좁은 화면에서는 .left 가 320px 을
+     차지해 지도 자리에 20~30px 밖에 남지 않아 마커만 세로로 늘어섰다.
+     세로로 쌓고, 지도를 먼저 보여준다. */
+  @media (max-width: 760px) {
+    body { overflow-y: auto; }
+    header { padding: 12px 14px; }
+    header h1 { font-size: 15px; }
+    .progress-wrap { min-width: 0; width: 100%; }
+
+    .layout { flex-direction: column; height: auto; }
+    .left { width: 100%; min-width: 0; border-right: none;
+      border-bottom: 1px solid var(--line); order: 2; }
+    .list { overflow-y: visible; max-height: none; }
+    .right { order: 1; overflow: visible; padding: 12px;
+      border-bottom: 1px solid var(--line); }
+    .map-wrap { width: 100%; }
+    .map-wrap svg.kmap { height: auto; width: 100%; max-width: 460px;
+      margin: 0 auto; }
+    .legend { flex-wrap: wrap; }
+
+    /* 표가 좁아지므로 '등반일시' 칸을 줄인다 */
+    .list-head, .row { grid-template-columns: 1fr 46px 74px 32px 32px;
+      gap: 4px; font-size: 12px; }
+  }
+"""
 
 
 def mountains_js(kmap, mts):
@@ -97,7 +127,7 @@ def build(kmap, mts, provinces_svg):
     # 이제 모든 좌표가 실제 위도·경도에서 나오므로 '위치 추정' 범례는 쓸 일이 없다
     src = re.sub(r'\s*<div class="item"><span class="sw" style="background:#fff;'
                  r'border-style:dashed[^>]*></span>위치 추정\(\*\)</div>', '', src, count=1)
-    src = src.replace('</style>', kmap_css() + '</style>', 1)
+    src = src.replace('</style>', kmap_css() + MOBILE_CSS + '</style>', 1)
     src = src.replace('</body>', '  <p class="mapsrc">지도 경계: Natural Earth 1:10m'
                                  ' · 시도 경계 admin-1 (public domain)</p>\n</body>', 1)
 
