@@ -91,11 +91,13 @@
  },
  "대둔산": {
   "file": "대둔산.jpg",
-  "title": "Chilseongbong at Daedunsan.jpg",
-  "author": "Yoo Chung",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3AChilseongbong_at_Daedunsan.jpg"
+  "title": "IMG_4301.JPEG",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-08-15"
  },
  "설악산": {
   "file": "설악산.jpg",
