@@ -16,6 +16,17 @@ OUT = os.path.join(ROOT, 'docs')
 # 이름이 내용에 따라 달라져야 브라우저가 예전 파일을 계속 쓰지 않는다.
 ASSET = {'css': 'assets/style.css', 'js': 'assets/app.js'}
 
+# 사진 파일 이름 -> 내용 해시가 붙은 이름. main() 의 copy_images() 가 채운다.
+IMG = {}
+
+
+def img(rel):
+    """이미지 주소. 내용이 바뀌면 이름도 바뀌어 브라우저가 새로 받는다.
+
+    사진은 이름이 고정이면 교체해도 방문자가 예전 것을 계속 본다.
+    지도가 없으면(설정 전 등) 원래 이름을 그대로 돌려준다."""
+    return IMG.get(rel, rel)
+
 # 방문자 수 스크립트. main() 에서 채운다. Firebase 설정이 없으면 빈 문자열이라
 # 아무것도 실리지 않는다.
 VISITS = {'js': '', 'html': ''}
@@ -186,7 +197,7 @@ def menu_photo(slug, photos):
     ph = photos.get(slug)
     if not ph:
         return ''
-    return (f'<img src="assets/photos/{e(thumb_file(ph))}" alt="" '
+    return (f'<img src="{img("assets/photos/" + thumb_file(ph))}" alt="" '
             f'loading="lazy" decoding="async">')
 
 
@@ -239,7 +250,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
     verify = '\n'.join(f'<meta name="{k}" content="{v}">'
                        for k, v in VERIFY.items() if v)
     path = urllib.parse.quote(path)
-    image = urllib.parse.quote(image or 'assets/photos/hero.jpg')
+    image = urllib.parse.quote(img(image or 'assets/photos/hero.jpg'))
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -257,8 +268,8 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
 <meta property="og:image" content="{SITE_URL}{image}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{SITE_URL}{path}">
-<link rel="icon" href="{up}assets/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
+<link rel="icon" href="{up}{img('assets/favicon.png')}" type="image/png">
+<link rel="apple-touch-icon" href="{up}{img('assets/apple-touch-icon.png')}">
 <link rel="stylesheet" href="{up}{ASSET['css']}">
 {extra_head}
 </head>
@@ -273,7 +284,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
             <text x="20" y="25.5" text-anchor="middle">100</text>
           </mask>
         </defs>
-        <image href="{up}assets/mark.jpg" width="40" height="40"
+        <image href="{up}{img('assets/mark.jpg')}" width="40" height="40"
                preserveAspectRatio="xMidYMid slice" mask="url(#mark100)"/>
       </svg>
       <b class="sr">100대 명산</b>
@@ -357,7 +368,7 @@ def build_index(mts):
         c = m['content']
         summary = c['summary'] if c else '글 준비 중입니다.'
         ph = photos.get(m['slug'])
-        thumb = (f'<img src="assets/photos/{e(thumb_file(ph))}" alt="{e(m["name"])} 사진" '
+        thumb = (f'<img src="{img("assets/photos/" + thumb_file(ph))}" alt="{e(m["name"])} 사진" '
                  f'loading="lazy" decoding="async">') if ph else ridge_svg(m)
         cards.append(f"""
       <a class="card{'' if c else ' todo'}" href="mountain/{e(m['slug'])}.html"
@@ -395,7 +406,7 @@ def build_index(mts):
         c = m['content']
         pcards.append(f"""
       <a class="pcard" href="mountain/{e(m['slug'])}.html">
-        <span class="pcard-img"><img src="assets/photos/{e(thumb_file(ph))}"
+        <span class="pcard-img"><img src="{img("assets/photos/" + thumb_file(ph))}"
              alt="{e(m['name'])} 사진" loading="lazy" decoding="async"></span>
         <span class="pcard-body">
           <span class="pc-top"><i>{e(m['region'])}</i><b>{e(m['height'])}</b></span>
@@ -407,7 +418,7 @@ def build_index(mts):
       </a>""")
 
     hero = photos.get('hero')
-    hero_bg = (f'<img class="vhero-bg" src="assets/photos/{e(hero["file"])}" alt="" '
+    hero_bg = (f'<img class="vhero-bg" src="{img("assets/photos/" + hero["file"])}" alt="" '
                f'fetchpriority="high" decoding="async">') if hero else ''
     hero_credit = (f'<p class="vhero-credit">사진 {credit_line(hero)}</p>') if hero else ''
 
@@ -759,7 +770,7 @@ def food_html(food, mt_name=''):
 def build_mountain(m, prev, nxt, kmap, photos):
     c = m['content']
     ph = photos.get(m['slug'])
-    cover = (f'<figure class="cover"><img src="../assets/photos/{e(ph["file"])}" '
+    cover = (f'<figure class="cover"><img src="../{img("assets/photos/" + ph["file"])}" '
              f'alt="{e(m["name"])} 사진" decoding="async">'
              f'<figcaption>사진 {credit_line(ph)}</figcaption></figure>') if ph else (
              f'<figure class="cover illus">{ridge_svg(m, vb="0 96 400 172")}'
@@ -856,7 +867,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
   {nav}
 </article>
 """
-    share = f"assets/photos/{ph['file']}" if ph else 'assets/photos/hero.jpg'
+    share = f"assets/photos/{ph['file']}" if ph else 'assets/photos/hero.jpg'  # img() 는 page() 안에서
     return page(f"{m['name']} {m['height']} — 코스·난이도·인증장소 | {SITE}", body, 1, desc,
                 image=share, path=f"mountain/{m['slug']}.html")
 
@@ -1452,15 +1463,32 @@ def main():
     os.makedirs(os.path.join(OUT, 'mountain'), exist_ok=True)
     os.makedirs(os.path.join(OUT, 'assets'), exist_ok=True)
 
-    src_photos = os.path.join(ROOT, 'assets/photos')
-    if os.path.isdir(src_photos):
-        shutil.copytree(src_photos, os.path.join(OUT, 'assets/photos'), dirs_exist_ok=True)
-    # assets/ 바로 아래의 낱개 파일(로고 등)도 함께 싣는다
-    src_assets = os.path.join(ROOT, 'assets')
-    for fn in os.listdir(src_assets) if os.path.isdir(src_assets) else []:
-        fp = os.path.join(src_assets, fn)
-        if os.path.isfile(fp):
-            shutil.copy2(fp, os.path.join(OUT, 'assets', fn))
+    def copy_images():
+        """이미지를 내용 해시가 붙은 이름으로 싣고, 원래 이름으로도 남긴다.
+
+        이름이 고정이면 사진을 갈아도 방문자 브라우저가 예전 것을 계속 쓴다.
+        원래 이름을 함께 두는 이유는, 방문자에게 캐시된 옛 HTML 이 그 주소를
+        찾기 때문이다. 없으면 그림이 깨진 화면을 보게 된다.
+        같은 내용은 git 이 한 번만 저장하므로 저장소가 두 배가 되지는 않는다."""
+        src_assets = os.path.join(ROOT, 'assets')
+        if not os.path.isdir(src_assets):
+            return
+        for dirpath, _, names in os.walk(src_assets):
+            for fn in names:
+                fp = os.path.join(dirpath, fn)
+                rel = os.path.relpath(fp, ROOT).replace(os.sep, '/')
+                data = open(fp, 'rb').read()
+                dest_dir = os.path.join(OUT, os.path.dirname(rel))
+                os.makedirs(dest_dir, exist_ok=True)
+                shutil.copy2(fp, os.path.join(OUT, rel))       # 원래 이름
+                if fn.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.svg')):
+                    base, ext = fn.rsplit('.', 1)
+                    h = hashlib.md5(data).hexdigest()[:8]
+                    hashed = f'{os.path.dirname(rel)}/{base}.{h}.{ext}'
+                    shutil.copy2(fp, os.path.join(OUT, hashed))
+                    IMG[rel] = hashed
+
+    copy_images()
     def put(kind, name, text):
         """내용 해시를 파일 이름에 넣는다.
 
