@@ -9,7 +9,93 @@
 <meta property="og:description" content="블랙야크 100대 명산 기록 방명록">
 <meta property="og:type" content="article">
 <link rel="stylesheet" href="assets/style.css">
+<script type="module">
+import { initializeApp } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit,
+         serverTimestamp } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+const db = getFirestore(initializeApp({"apiKey": "AIzaSyAQzTXDp_eWdhR_XNxIpouXV85QPnnvvkc", "authDomain": "bac100-89748.firebaseapp.com", "projectId": "bac100-89748", "storageBucket": "bac100-89748.firebasestorage.app", "messagingSenderId": "826068803130", "appId": "1:826068803130:web:edc509ea1e5e0041b6df03"}));
+const listEl = document.getElementById('gb-list');
+const form = document.getElementById('gb-form');
+const box = document.getElementById('gb-msgbox');
+const left = document.getElementById('gb-left');
+const msg = document.getElementById('gb-msg');
+const send = document.getElementById('gb-send');
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function when(ts) {
+  if (!ts || !ts.toDate) return '';
+  const d = ts.toDate();
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`
+       + `.${String(d.getDate()).padStart(2,'0')}`;
+}
+function say(text, bad) {
+  box.textContent = text;
+  box.className = 'gb-msgbox' + (bad ? ' bad' : ' ok');
+  box.hidden = false;
+}
+
+// 설정이 틀렸거나 망이 막히면 요청이 오류 없이 멈춘다.
+// 그대로 두면 '불러오는 중…' 이 영영 남으므로 시간을 끊는다.
+function within(ms, work) {
+  return Promise.race([work, new Promise((_, no) =>
+    setTimeout(() => no(new Error('시간 초과')), ms))]);
+}
+
+async function load() {
+  try {
+    const snap = await within(12000, getDocs(query(collection(db, 'guestbook'),
+      orderBy('createdAt', 'desc'), limit(200))));
+    if (snap.empty) {
+      listEl.innerHTML = '<p class="gb-empty">아직 남겨진 글이 없습니다. '
+        + '첫 글을 남겨주세요.</p>';
+      return;
+    }
+    listEl.innerHTML = snap.docs.map(d => {
+      const v = d.data();
+      return '<article class="gb-item"><header><b>' + esc(v.name || '익명')
+        + '</b><span>' + when(v.createdAt) + '</span></header><p>'
+        + esc(v.message || '') + '</p></article>';
+    }).join('');
+  } catch (err) {
+    listEl.innerHTML = '<p class="gb-empty">방명록을 불러오지 못했습니다. '
+      + '잠시 뒤 새로고침해 주세요.</p>';
+    console.error(err);
+  }
+}
+
+msg.addEventListener('input', () => { left.textContent = 500 - msg.value.length; });
+
+form.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  if (document.getElementById('gb-trap').value) return;   // 자동 프로그램
+  const name = document.getElementById('gb-name').value.trim();
+  const text = msg.value.trim();
+  if (!name || !text) return say('이름과 내용을 모두 적어주세요.', true);
+
+  send.disabled = true; send.textContent = '보내는 중…';
+  try {
+    await within(12000, addDoc(collection(db, 'guestbook'),
+      { name: name.slice(0, 20), message: text.slice(0, 500),
+         createdAt: serverTimestamp() }));
+    form.reset(); left.textContent = 500;
+    say('남겨주셔서 고맙습니다.', false);
+    load();
+  } catch (err) {
+    say('글을 남기지 못했습니다. 잠시 뒤 다시 시도해 주세요.', true);
+    console.error(err);
+  } finally {
+    send.disabled = false; send.textContent = '남기기';
+  }
+});
+
+load();
+</script>
 </head>
 <body>
 <header class="site">
@@ -45,13 +131,23 @@
   <p class="sub">산에서 만난 것, 이 기록에 보태고 싶은 것을 남겨주세요.
      남긴 글은 모두에게 보입니다. 연락처나 개인정보는 적지 마세요.</p>
   
-  <div class="gb-setup">
-    <b>아직 준비 중입니다.</b>
-    <p>방명록을 쓰려면 Firebase 설정이 필요합니다.
-       <code>blog/data/firebase.json</code> 을 만들고 다시 빌드하면 이 자리에
-       방명록이 나타납니다. 만드는 방법은 <code>README.md</code> 의 '방명록' 절에
-       적어 두었습니다.</p>
-  </div>
+  <form id="gb-form" class="gb-form" autocomplete="off">
+    <div class="gb-row">
+      <input id="gb-name" name="name" type="text" maxlength="20"
+             placeholder="이름 또는 별명" required>
+      <!-- 사람에게는 안 보인다. 자동 프로그램이 채우면 보내지 않는다 -->
+      <input id="gb-trap" name="website" type="text" tabindex="-1"
+             aria-hidden="true" autocomplete="off">
+    </div>
+    <textarea id="gb-msg" name="message" maxlength="500" rows="4"
+              placeholder="다녀오신 산, 남기고 싶은 말을 적어주세요." required></textarea>
+    <div class="gb-bar">
+      <span class="gb-count"><b id="gb-left">500</b>자 남음</span>
+      <button id="gb-send" type="submit">남기기</button>
+    </div>
+    <p id="gb-msgbox" class="gb-msgbox" hidden></p>
+  </form>
+  <div id="gb-list" class="gb-list"><p class="gb-loading">불러오는 중…</p></div>
 </main>
 <footer class="site">
   <p><b>블랙야크 100대 명산 기록</b> · 산 데이터 100건 · 지도 데이터 Natural Earth (public domain)</p>

@@ -9,7 +9,49 @@
 <meta property="og:description" content="100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에">
 <meta property="og:type" content="article">
 <link rel="stylesheet" href="assets/style.css">
+<script type="module">
+import { initializeApp } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, increment } from
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+const db = getFirestore(initializeApp({"apiKey": "AIzaSyAQzTXDp_eWdhR_XNxIpouXV85QPnnvvkc", "authDomain": "bac100-89748.firebaseapp.com", "projectId": "bac100-89748", "storageBucket": "bac100-89748.firebasestorage.app", "messagingSenderId": "826068803130", "appId": "1:826068803130:web:edc509ea1e5e0041b6df03"}));
+const ref = doc(db, 'stats/appDownloads');
+const el = document.getElementById('app-count');
+
+function show(n) {
+  if (!el || !(n > 0)) return;
+  el.textContent = '지금까지 ' + n.toLocaleString('ko-KR') + '번 내려받았습니다.';
+  el.hidden = false;
+}
+
+async function read() {
+  try {
+    const snap = await getDoc(ref);
+    if (snap.exists()) show(snap.data().count);
+  } catch (err) {
+    /* 숫자를 못 읽어도 내려받기는 되어야 하므로 조용히 넘어간다 */
+  }
+}
+
+async function bump() {
+  // 같은 브라우저에서 여러 번 눌러도 한 번만 센다
+  try {
+    if (localStorage.getItem('BAC100_APP_DOWNLOADED')) return;
+    localStorage.setItem('BAC100_APP_DOWNLOADED', '1');
+  } catch (err) { /* 저장이 막힌 브라우저면 그냥 센다 */ }
+  try {
+    await setDoc(ref, { count: increment(1) }, { merge: true });
+    read();
+  } catch (err) {
+    /* 세는 데 실패해도 파일은 이미 받아지고 있다 */
+  }
+}
+
+const btn = document.querySelector('.app-cta a[download]');
+if (btn) btn.addEventListener('click', bump);
+read();
+</script>
 </head>
 <body>
 <header class="site">
