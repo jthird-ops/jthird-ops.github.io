@@ -1284,8 +1284,14 @@ JS = r"""
     cards.forEach(function (c) { c.classList.toggle('active', c.dataset.tab === id); });
     if (history.replaceState) history.replaceState(null, '', '#' + id);
     if (scroll) {
-      var top = menu.getBoundingClientRect().top + window.pageYOffset - 70;
-      window.scrollTo({ top: top, behavior: 'smooth' });
+      // 넓은 화면에서는 메뉴가 한 줄이라 메뉴 위로 가면 내용까지 함께 보인다.
+      // 좁은 화면에서는 카드가 세로로 쌓여 메뉴만으로 한 화면을 넘기므로,
+      // 그때는 고른 내용으로 바로 내려간다.
+      var panel = document.getElementById(id);
+      var tall = menu.getBoundingClientRect().height > window.innerHeight * 0.55;
+      var target = (tall && panel) ? panel : menu;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - 62;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
   }
 
