@@ -20,6 +20,10 @@ ASSET = {'css': 'assets/style.css', 'js': 'assets/app.js'}
 # 아무것도 실리지 않는다.
 VISITS = {'js': '', 'html': ''}
 
+# 배포 주소. og:image·canonical·sitemap 은 절대 주소여야 해서 필요하다.
+# 도메인을 옮기면 이 값만 고치면 된다.
+SITE_URL = "https://jthird-ops.github.io/bac100/"
+
 SITE = "블랙야크 100대 명산 기록"
 TAGLINE = "100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에"
 
@@ -222,8 +226,12 @@ def load():
 
 
 # ---------------------------------------------------------------- 공통 셸
-def page(title, body, depth=0, desc="", extra_head=""):
+def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
     up = '../' * depth
+    # 파일 이름이 한글이라 og:image·canonical 은 퍼센트 인코딩해 둔다.
+    # 카카오톡·페이스북 크롤러가 원문 UTF-8 주소를 못 읽는 경우가 있다.
+    path = urllib.parse.quote(path)
+    image = urllib.parse.quote(image or 'assets/photos/hero.jpg')
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -234,6 +242,14 @@ def page(title, body, depth=0, desc="", extra_head=""):
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc or TAGLINE)}">
 <meta property="og:type" content="article">
+<meta property="og:site_name" content="{e(SITE)}">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="{SITE_URL}{path}">
+<meta property="og:image" content="{SITE_URL}{image}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="{SITE_URL}{path}">
+<link rel="icon" href="{up}assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
 <link rel="stylesheet" href="{up}{ASSET['css']}">
 {extra_head}
 </head>
@@ -831,7 +847,9 @@ def build_mountain(m, prev, nxt, kmap, photos):
   {nav}
 </article>
 """
-    return page(f"{m['name']} {m['height']} — 코스·난이도·인증장소 | {SITE}", body, 1, desc)
+    share = f"assets/photos/{ph['file']}" if ph else 'assets/photos/hero.jpg'
+    return page(f"{m['name']} {m['height']} — 코스·난이도·인증장소 | {SITE}", body, 1, desc,
+                image=share, path=f"mountain/{m['slug']}.html")
 
 
 # ---------------------------------------------------------------- CSS / JS
@@ -1488,6 +1506,22 @@ def main():
         nxt = mts[i + 1] if i < len(mts) - 1 else None
         open(os.path.join(OUT, 'mountain', m['slug'] + '.html'), 'w', encoding='utf-8') \
             .write(build_mountain(m, prev, nxt, kmap, photos))
+
+    # 검색엔진용 — 어떤 주소가 있는지 알려준다
+    today = datetime.date.today().isoformat()
+    urls = [('', '1.0'), ('guestbook.html', '0.5'), ('credits.html', '0.3')]
+    urls += [(f"mountain/{m['slug']}.html", '0.8') for m in mts]
+    sitemap = ['<?xml version="1.0" encoding="UTF-8"?>',
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for loc, pri in urls:
+        sitemap.append(f'<url><loc>{SITE_URL}{urllib.parse.quote(loc)}</loc>'
+                       f'<lastmod>{today}</lastmod><priority>{pri}</priority></url>')
+    sitemap.append('</urlset>')
+    open(os.path.join(OUT, 'sitemap.xml'), 'w', encoding='utf-8').write(
+        '\n'.join(sitemap))
+
+    open(os.path.join(OUT, 'robots.txt'), 'w', encoding='utf-8').write(
+        f'User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n')
 
     written = sum(1 for m in mts if m['content'])
     print(f'생성 완료: 페이지 {len(mts) + 2}개 (본문 작성 {written}/100)')
