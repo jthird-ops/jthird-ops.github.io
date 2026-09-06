@@ -27,7 +27,7 @@ SITE_URL = "https://jthird-ops.github.io/"
 # 검색엔진 사이트 소유확인. 등록할 때 받은 값을 넣는다. 빈 값은 나가지 않는다.
 VERIFY = {
     "naver-site-verification": "b875b07332feb15b1f88e64db570658ec357757e",
-    "google-site-verification": "",
+    "google-site-verification": "5BFFeaf_HVuRt1YrPSbNKNMxJ4LbtXOB9mh8F-GnnmQ",
 }
 
 SITE = "블랙야크 100대 명산 기록"
