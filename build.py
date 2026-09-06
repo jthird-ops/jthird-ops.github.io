@@ -24,6 +24,12 @@ VISITS = {'js': '', 'html': ''}
 # 도메인을 옮기면 이 값만 고치면 된다.
 SITE_URL = "https://jthird-ops.github.io/"
 
+# 검색엔진 사이트 소유확인. 등록할 때 받은 값을 넣는다. 빈 값은 나가지 않는다.
+VERIFY = {
+    "naver-site-verification": "b875b07332feb15b1f88e64db570658ec357757e",
+    "google-site-verification": "",
+}
+
 SITE = "블랙야크 100대 명산 기록"
 TAGLINE = "100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에"
 
@@ -230,6 +236,8 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
     up = '../' * depth
     # 파일 이름이 한글이라 og:image·canonical 은 퍼센트 인코딩해 둔다.
     # 카카오톡·페이스북 크롤러가 원문 UTF-8 주소를 못 읽는 경우가 있다.
+    verify = '\n'.join(f'<meta name="{k}" content="{v}">'
+                       for k, v in VERIFY.items() if v)
     path = urllib.parse.quote(path)
     image = urllib.parse.quote(image or 'assets/photos/hero.jpg')
     return f"""<!DOCTYPE html>
@@ -237,6 +245,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{verify}
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc or TAGLINE)}">
 <meta property="og:title" content="{e(title)}">
