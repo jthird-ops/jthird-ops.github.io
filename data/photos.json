@@ -427,11 +427,13 @@
  },
  "소요산": {
   "file": "소요산.jpg",
-  "title": "Soyosan.jpg",
-  "author": "Jjw",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3ASoyosan.jpg"
+  "title": "IMG_2866.HEIC",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-09-14"
  },
  "천성산": {
   "file": "천성산.jpg",
