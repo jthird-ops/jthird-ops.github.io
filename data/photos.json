@@ -692,12 +692,13 @@
  },
  "반야봉-지리산": {
   "file": "반야봉-지리산.jpg",
-  "title": "지리산 반야봉",
-  "author": "한국관광공사",
-  "license": "공공누리 제3유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#03",
-  "source": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=716410",
-  "provider": "한국관광공사 TourAPI"
+  "title": "IMG_3170.HEIC",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-10-23"
  },
  "백운산-광양": {
   "file": "백운산-광양.jpg",
