@@ -1245,6 +1245,9 @@ footer.site{border-top:1px solid var(--line);margin-top:40px;padding:32px 24px 5
   font-size:13px;color:var(--sub);text-align:center}
 footer.site p{margin:0 0 6px}
 .muted{font-size:12px;opacity:.8;max-width:52em;margin:0 auto}
+/* footer.site p 가 .muted 보다 우선해서 margin:0 auto 를 덮어쓴다.
+   그래서 글자만 가운데고 상자는 왼쪽에 붙어 있었다. */
+footer.site .muted{margin:0 auto;text-align:center}
 
 @media (max-width:700px){
   .vhero-credit .c-title{display:none}
