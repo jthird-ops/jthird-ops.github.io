@@ -1,0 +1,8 @@
+{
+ "apiKey": "여기에-웹앱-apiKey",
+ "authDomain": "프로젝트아이디.firebaseapp.com",
+ "projectId": "프로젝트아이디",
+ "storageBucket": "프로젝트아이디.firebasestorage.app",
+ "messagingSenderId": "000000000000",
+ "appId": "1:000000000000:web:0000000000000000000000"
+}

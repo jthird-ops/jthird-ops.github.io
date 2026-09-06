@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블랙야크 100대 명산 등반 트래커</title>
+
+<!-- PWA 매니페스트 및 테마 설정 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BAC100">
+
+<style>
+  :root {
+    --green: #1f9d55;
+    --green-light: #e6f6ec;
+    --red: #d64545;
+    --red-light: #fdecec;
+    --ink: #1f2430;
+    --sub: #6b7280;
+    --line: #e5e7eb;
+    --bg: #f7f8fa;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  header {
+    padding: 14px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 {
+    font-size: 17px;
+    margin: 0;
+    font-weight: 700;
+  }
+  header h1 span {
+    color: var(--sub);
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 10px;
+    background: #eee;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #34a853, #1f9d55);
+    width: 0%;
+    transition: width .3s ease;
+  }
+  .progress-label {
+    font-size: 12.5px;
+    color: var(--sub);
+    white-space: nowrap;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .btn:hover { background: #f2f3f5; }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.primary:hover { background: #1d4ed8; }
+  input[type=file] { display: none; }
+
+  .status-banner {
+    background: #e6f4ea;
+    color: #137333;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    text-align: center;
+    border-bottom: 1px solid #ceead6;
+    font-weight: 600;
+  }
+
+  .layout {
+    display: flex;
+    height: calc(100vh - 95px);
+  }
+  .left {
+    width: 420px;
+    min-width: 320px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+  }
+  .search-row {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+  }
+  .search-row input[type=text] {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 13px;
+  }
+  .region-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .chip {
+    font-size: 11.5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    color: var(--sub);
+    background: #fafafa;
+  }
+  .chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .list-head {
+    display: grid;
+    grid-template-columns: 1fr 54px 92px 36px 36px;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--sub);
+    border-bottom: 1px solid var(--line);
+    background: #fbfbfc;
+  }
+  .list {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .region-header {
+    position: sticky;
+    top: 0;
+    background: #f1f3f6;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #445;
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 54px 92px 36px 36px;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid #f0f1f3;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .row:hover { background: #f7fbff; }
+  .row.climbed { background: var(--green-light); }
+  .row.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .row .name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row .name .region-tag {
+    font-weight: 400;
+    color: var(--sub);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  .row .name .approx-mark {
+    color: #c98a1a;
+    font-weight: 700;
+    margin-left: 2px;
+  }
+  .row .height {
+    font-size: 11.5px;
+    color: var(--sub);
+    white-space: nowrap;
+    text-align: right;
+  }
+  .row input[type=date] {
+    width: 100%;
+    font-size: 11.5px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 2px 3px;
+    color: var(--ink);
+  }
+  .dot-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: #fff;
+    cursor: pointer;
+    margin: 0 auto;
+    display: block;
+  }
+  .dot-btn.climb-btn.on { background: var(--green); border-color: var(--green); }
+  .dot-btn.unclimb-btn.on { background: var(--red); border-color: var(--red); }
+
+  .right {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background: #fdfdfd;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px;
+  }
+  .map-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .map-wrap img {
+    display: block;
+    width: 880px;
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .marker {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .marker.unclimbed { background: var(--red); }
+  .marker.climbed { background: var(--green); }
+  .marker.approx { border-style: dashed; border-color: #c98a1a; }
+  .marker.pulse {
+    transform: translate(-50%, -50%) scale(1.9);
+    box-shadow: 0 0 0 4px rgba(37,99,235,.45);
+    z-index: 5;
+  }
+  .marker:hover { transform: translate(-50%, -50%) scale(1.6); z-index: 4; }
+
+  .legend {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,.95);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    display: flex;
+    gap: 12px;
+  }
+  .legend .item { display: flex; align-items: center; gap: 5px; }
+  .legend .sw { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #d7d9de; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>블랙야크 100대 명산 등반 트래커 <span>BAC 100 · 자동 저장 지원</span></h1>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 100 완등 (0%)</div>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="resetBtn">전체 초기화</button>
+    <button class="btn" id="exportBtn">백업(내보내기)</button>
+    <button class="btn" id="importBtn">복구(불러오기)</button>
+    <input type="file" id="importFile" accept="application/json">
+  </div>
+</header>
+
+<div class="status-banner">
+  ✨ 기록이 이 기기에 자동으로 저장되며, 앱을 열 때마다 자동으로 복원됩니다.
+</div>
+
+<div class="layout">
+  <div class="left">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="산 이름 검색...">
+    </div>
+    <div class="region-chips" id="regionChips"></div>
+    <div class="list-head">
+      <div>산 이름</div>
+      <div style="text-align:right;">높이</div>
+      <div>등반일시</div>
+      <div style="text-align:center;">등반</div>
+      <div style="text-align:center;">미등반</div>
+    </div>
+    <div class="list" id="listEl"></div>
+  </div>
+  <div class="right">
+    <div class="map-wrap" id="mapWrap">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAM9A4gDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD+/iiiigAooooAKKKKACiiigAooooAKKKKACiiigCErKSSJSoycDanAyfVCf1o2Tf89f8Ax1P/ ImpR0/Fv5mloAh2Tf8APY/98px/45/PNGyb/nsT9VT+iCpqKAIdkv8Az1/8dX/4mk2Tf89iP+Ap/VDU9FAEOyb/AJ6/+Op/8TRsm/56/Djqf/E1NRQO/9WV/kQbJv8Ansf++Y// AIijZN/z2P/fMf/ xE1PRQK/9WRBsm/57H/vlP/iKXZN/z2P/AHyn/wARU1FHn/X3bDv/ AFZf5EWyTj983v8AJHz7fd/CkKSnpKR/wFD/ ADSpqKVl5/e/8wv6fciDZN/z2P/fMf/ xELsm/56/Djqf/E1NRRb1+9/5hd+X3L/Ih2Tf8APY/98p/8RSbJv+ex/wC+U/8AiKnoot/V3/mF/wCrL/Ih2Tf89v8Ax1P/ AIigpN/z2I/4Cn9UNTUUwu/L7l/kQbJv+ex/75T/ AOIpdk3/AD2J+qp/RBU1FAXfl9y/yINk3/PYj/gKf1Q0bJv+ex/75T/4ip6KVvX73/mF/T7l/kQ7Jv8Ant/46n/xFIUm/wCex/75T/4g1PRTEQ7Jv+ex6/3U/L7lBSbtKR/wFP8A4ipqKB36fovztcg2Tf8APY/98p/8RS7Jv+ev/jq//E1NRQIh2Tf89f8Ax1f/ ImjZN/z1/8AHU/+Jqaigd/6sv8AIg2Tf89j/wB8p/8AEUbJv+ex/wC+U/8AiKnopW/q7/zC/p9y/yIeXN/z2P/fMf/ xFGyb/nsb4/up+f3Knop2XmG/Y/8A3zH/APEVPRRZef3v/Md/T7l/kQbJv+ex/wC+U/8AiKXZN/z2x/wFP6oa/q7/AMyHZN/z1/8A1V/i
+    " id="mapImg" alt="지도">
+      <div class="legend">
+        <div class="item"><span class="sw" style="background:var(--green)"></span>완등</div>
+        <div class="item"><span class="sw" style="background:var(--red)"></span>미완등</div>
+        <div class="item"><span class="sw" style="background:#fff;border-style:dashed;border-color:#c98a1a;"></span>위치 추정(*)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MOUNTAINS = [{"rank": 1, "name": "가리산(홍천)", "height": "1051m", "region": "강원", "xPct": 49.13, "yPct": 15.71, "approx": false, "climbed": false, "date": ""}, {"rank": 2, "name": "가리왕산", "height": "1561m", "region": "강원", "xPct": 56.77, "yPct": 23.85, "approx": false, "climbed": false, "date": ""}, {"rank": 3, "name": "가야산(합천)", "height": "1430m", "region": "경남", "xPct": 50.5, "yPct": 53.5, "approx": true, "climbed": false, "date": ""}, {"rank": 4, "name": "가야산(충남)", "height": "678m", "region": "충남", "xPct": 28.5, "yPct": 35.04, "approx": false, "climbed": false, "date": ""}, {"rank": 5, "name": "가지산", "height": "1240m", "region": "경남", "xPct": 61.48, "yPct": 59.65, "approx": false, "climbed": false, "date": ""}, {"rank": 6, "name": "감악산(원주)", "height": "930m", "region": "강원", "xPct": 50.45, "yPct": 27.26, "approx": false, "climbed": false, "date": ""}, {"rank": 7, "name": "감악산(파주)", "height": "675m", "region": "경기", "xPct": 34.83, "yPct": 13.06, "approx": false, "climbed": false, "date": ""}, {"rank": 8, "name": "계룡산", "height": "816m", "region": "충남", "xPct": 36.04, "yPct": 43.59, "approx": false, "climbed": false, "date": ""}, {"rank": 9, "name": "계방산", "height": "1577m", "region": "강원", "xPct": 55.3, "yPct": 18.64, "approx": false, "climbed": false, "date": ""}, {"rank": 10, "name": "관악산", "height": "629m", "region": "서울", "xPct": 33.4, "yPct": 21.89, "approx": false, "climbed": false, "date": ""}, {"rank": 11, "name": "광덕산", "height": "699m", "region": "충남", "xPct": 34.35, "yPct": 36.18, "approx": false, "climbed": false, "date": ""}, {"rank": 12, "name": "구병산(보은)", "height": "877m", "region": "충북", "xPct": 45.01, "yPct": 41.83, "approx": false, "climbed": false, "date": ""}, {"rank": 13, "name": "구봉산(진안)", "height": "1002m", "region": "전북", "xPct": 38.54, "yPct": 51.58, "approx": false, "climbed": false, "date": ""}, {"rank": 14, "name": "금수산", "height": "1016m", "region": "충북", "xPct": 51.25, "yPct": 32.68, "approx": false, "climbed": false, "date": ""}, {"rank": 15, "name": "금오산", "height": "976m", "region": "경북", "xPct": 51.25, "yPct": 49.63, "approx": false, "climbed": false, "date": ""}, {"rank": 16, "name": "금정산", "height": "801m", "region": "경남", "xPct": 61.5, "yPct": 68.5, "approx": true, "climbed": false, "date": ""}, {"rank": 17, "name": "남산(경주)", "height": "468m", "region": "경북", "xPct": 63.89, "yPct": 55.87, "approx": false, "climbed": false, "date": ""}, {"rank": 18, "name": "내변산(변산)", "height": "424m", "region": "전북", "xPct": 26.74, "yPct": 55.15, "approx": false, "climbed": false, "date": ""}, {"rank": 19, "name": "내연산", "height": "711m", "region": "경북", "xPct": 65.55, "yPct": 46.66, "approx": false, "climbed": false, "date": ""}, {"rank": 20, "name": "내장산", "height": "763m", "region": "전북", "xPct": 30.46, "yPct": 58.05, "approx": false, "climbed": false, "date": ""}, {"rank": 21, "name": "노인봉(오대산)", "height": "1338m", "region": "강원", "xPct": 58.44, "yPct": 18.64, "approx": false, "climbed": false, "date": ""}, {"rank": 22, "name": "달마산", "height": "489m", "region": "전남", "xPct": 24.42, "yPct": 79.42, "approx": false, "climbed": false, "date": ""}, {"rank": 23, "name": "대둔산", "height": "878m", "region": "충남", "xPct": 40.69, "yPct": 45.93, "approx": false, "climbed": false, "date": ""}, {"rank": 24, "name": "대야산", "height": "930m", "region": "경북", "xPct": 45.91, "yPct": 36.41, "approx": false, "climbed": false, "date": ""}, {"rank": 25, "name": "덕룡산", "height": "432m", "region": "전남", "xPct": 24.83, "yPct": 76.84, "approx": false, "climbed": false, "date": ""}, {"rank": 26, "name": "덕유산", "height": "1614m", "region": "전북", "xPct": 42.81, "yPct": 52.8, "approx": false, "climbed": false, "date": ""}, {"rank": 27, "name": "덕항산", "height": "1071m", "region": "강원", "xPct": 62.77, "yPct": 27.32, "approx": false, "climbed": false, "date": ""}, {"rank": 28, "name": "도락산", "height": "964m", "region": "충북", "xPct": 49.63, "yPct": 35.98, "approx": false, "climbed": false, "date": ""}, {"rank": 29, "name": "도봉산", "height": "730m", "region": "서울", "xPct": 33.86, "yPct": 18.21, "approx": false, "climbed": false, "date": ""}, {"rank": 30, "name": "동악산(곡성)", "height": "735m", "region": "전남", "xPct": 35.02, "yPct": 62.96, "approx": false, "climbed": false, "date": ""}, {"rank": 31, "name": "두륜산", "height": "703m", "region": "전남", "xPct": 26.16, "yPct": 77.8, "approx": false, "climbed": false, "date": ""}, {"rank": 32, "name": "두타산", "height": "1353m", "region": "강원", "xPct": 62.74, "yPct": 24.75, "approx": false, "climbed": false, "date": ""}, {"rank": 33, "name": "마니산(강화도)", "height": "472m", "region": "인천", "xPct": 27.38, "yPct": 18.38, "approx": false, "climbed": false, "date": ""}, {"rank": 34, "name": "마이산(진안)", "height": "527m", "region": "전북", "xPct": 38.19, "yPct": 54.23, "approx": false, "climbed": false, "date": ""}, {"rank": 35, "name": "천마산", "height": "812m", "region": "경기", "xPct": 38.2, "yPct": 19.0, "approx": true, "climbed": false, "date": ""}, {"rank": 36, "name": "명지산", "height": "1267m", "region": "경기", "xPct": 41.27, "yPct": 14.52, "approx": false, "climbed": false, "date": ""}, {"rank": 37, "name": "모악산", "height": "793m", "region": "전북", "xPct": 33.37, "yPct": 54.43, "approx": false, "climbed": false, "date": ""}, {"rank": 38, "name": "무등산", "height": "1100m", "region": "전남", "xPct": 31.06, "yPct": 65.66, "approx": false, "climbed": false, "date": ""}, {"rank": 39, "name": "민주지산", "height": "1241m", "region": "충북", "xPct": 44.28, "yPct": 49.63, "approx": false, "climbed": false, "date": ""}, {"rank": 40, "name": "바래봉(지리산)", "height": "1165m", "region": "지리산", "xPct": 40.3, "yPct": 60.48, "approx": false, "climbed": false, "date": ""}, {"rank": 41, "name": "반야봉(지리산)", "height": "1732m", "region": "지리산", "xPct": 42.35, "yPct": 62.4, "approx": false, "climbed": false, "date": ""}, {"rank": 42, "name": "방장산", "height": "743m", "region": "전남", "xPct": 28.38, "yPct": 59.47, "approx": false, "climbed": false, "date": ""}, {"rank": 43, "name": "방태산", "height": "1444m", "region": "강원", "xPct": 54.29, "yPct": 15.73, "approx": false, "climbed": false, "date": ""}, {"rank": 44, "name": "백덕산", "height": "1350m", "region": "강원", "xPct": 52.3, "yPct": 25.13, "approx": false, "climbed": false, "date": ""}, {"rank": 45, "name": "백암산", "height": "741m", "region": "전남", "xPct": 27.71, "yPct": 61.06, "approx": false, "climbed": false, "date": ""}, {"rank": 46, "name": "백운산(광양)", "height": "1228m", "region": "전남", "xPct": 56.94, "yPct": 27.29, "approx": false, "climbed": false, "date": ""}, {"rank": 47, "name": "백운산(동강)", "height": "882m", "region": "강원", "xPct": 40.19, "yPct": 66.73, "approx": false, "climbed": false, "date": ""}, {"rank": 48, "name": "북한산", "height": "837m", "region": "서울", "xPct": 35.15, "yPct": 17.78, "approx": false, "climbed": false, "date": ""}, {"rank": 49, "name": "불갑산(영광)", "height": "516m", "region": "전남", "xPct": 25.23, "yPct": 63.47, "approx": false, "climbed": false, "date": ""}, {"rank": 50, "name": "비슬산", "height": "1083m", "region": "경북", "xPct": 53.61, "yPct": 56.78, "approx": false, "climbed": false, "date": ""}, {"rank": 51, "name": "삼악산", "height": "654m", "region": "강원", "xPct": 43.98, "yPct": 15.9, "approx": false, "climbed": false, "date": ""}, {"rank": 52, "name": "선운산", "height": "336m", "region": "전북", "xPct": 26.89, "yPct": 57.67, "approx": false, "climbed": false, "date": ""}, {"rank": 53, "name": "설악산", "height": "1708m", "region": "강원", "xPct": 55.45, "yPct": 11.35, "approx": false, "climbed": false, "date": ""}, {"rank": 54, "name": "소백산", "height": "1439m", "region": "경북", "xPct": 52.5, "yPct": 34.5, "approx": true, "climbed": false, "date": ""}, {"rank": 55, "name": "소요산", "height": "587m", "region": "경기", "xPct": 36.84, "yPct": 13.05, "approx": false, "climbed": false, "date": ""}, {"rank": 56, "name": "속리산", "height": "1058m", "region": "충북", "xPct": 45.49, "yPct": 40.33, "approx": false, "climbed": false, "date": ""}, {"rank": 57, "name": "수락산", "height": "637m", "region": "서울", "xPct": 36.37, "yPct": 17.88, "approx": false, "climbed": false, "date": ""}, {"rank": 58, "name": "신불산", "height": "1209m", "region": "경남", "xPct": 61.91, "yPct": 63.12, "approx": false, "climbed": false, "date": ""}, {"rank": 59, "name": "연인산", "height": "1068m", "region": "경기", "xPct": 43.0, "yPct": 15.5, "approx": true, "climbed": false, "date": ""}, {"rank": 60, "name": "오대산 비로봉", "height": "1563m", "region": "강원", "xPct": 57.11, "yPct": 18.13, "approx": false, "climbed": false, "date": ""}, {"rank": 61, "name": "오봉산(춘천)", "height": "779m", "region": "강원", "xPct": 45.5, "yPct": 12.0, "approx": true, "climbed": false, "date": ""}, {"rank": 62, "name": "오서산(보령)", "height": "791m", "region": "충남", "xPct": 28.25, "yPct": 40.34, "approx": false, "climbed": false, "date": ""}, {"rank": 63, "name": "용문산", "height": "1157m", "region": "경기", "xPct": 43.8, "yPct": 21.5, "approx": true, "climbed": false, "date": ""}, {"rank": 64, "name": "용봉산(홍성)", "height": "381m", "region": "충남", "xPct": 28.5, "yPct": 36.97, "approx": false, "climbed": false, "date": ""}, {"rank": 65, "name": "용화산", "height": "878m", "region": "강원", "xPct": 46.75, "yPct": 12.4, "approx": false, "climbed": false, "date": ""}, {"rank": 66, "name": "운악산", "height": "937m", "region": "경기", "xPct": 39.31, "yPct": 15.24, "approx": false, "climbed": false, "date": ""}, {"rank": 67, "name": "운장산", "height": "1122m", "region": "전북", "xPct": 37.21, "yPct": 51.58, "approx": false, "climbed": false, "date": ""}, {"rank": 68, "name": "운문산", "height": "1188m", "region": "경남", "xPct": 59.81, "yPct": 59.6, "approx": false, "climbed": false, "date": ""}, {"rank": 69, "name": "울화산(원주)", "height": "1004m", "region": "강원", "xPct": 50.45, "yPct": 24.3, "approx": true, "climbed": false, "date": ""}, {"rank": 70, "name": "유명산", "height": "862m", "region": "경기", "xPct": 42.0, "yPct": 20.8, "approx": true, "climbed": false, "date": ""}, {"rank": 71, "name": "응봉산(삼척)", "height": "999m", "region": "강원", "xPct": 64.97, "yPct": 30.82, "approx": false, "climbed": false, "date": ""}, {"rank": 72, "name": "월출산", "height": "809m", "region": "전남", "xPct": 28.84, "yPct": 73.1, "approx": false, "climbed": false, "date": ""}, {"rank": 73, "name": "월악산", "height": "1097m", "region": "충북", "xPct": 49.33, "yPct": 34.34, "approx": false, "climbed": false, "date": ""}, {"rank": 74, "name": "재약산", "height": "1189m", "region": "경남", "xPct": 61.26, "yPct": 61.1, "approx": false, "climbed": false, "date": ""}, {"rank": 75, "name": "적상산", "height": "1034m", "region": "전북", "xPct": 40.54, "yPct": 50.15, "approx": false, "climbed": false, "date": ""}, {"rank": 76, "name": "점봉산", "height": "1424m", "region": "강원", "xPct": 57.06, "yPct": 13.9, "approx": false, "climbed": false, "date": ""}, {"rank": 77, "name": "조령산", "height": "1026m", "region": "충북", "xPct": 47.92, "yPct": 36.31, "approx": false, "climbed": false, "date": ""}, {"rank": 78, "name": "주흘산", "height": "1106m", "region": "경북", "xPct": 49.39, "yPct": 37.62, "approx": false, "climbed": false, "date": ""}, {"rank": 79, "name": "주왕산", "height": "721m", "region": "경북", "xPct": 64.83, "yPct": 43.14, "approx": false, "climbed": false, "date": ""}, {"rank": 80, "name": "지리산 천왕봉", "height": "1915m", "region": "지리산", "xPct": 44.97, "yPct": 63.66, "approx": false, "climbed": false, "date": ""}, {"rank": 81, "name": "지장산(포천)", "height": "877m", "region": "경기", "xPct": 37.8, "yPct": 10.5, "approx": true, "climbed": false, "date": ""}, {"rank": 82, "name": "천관산", "height": "723m", "region": "전남", "xPct": 30.64, "yPct": 75.38, "approx": false, "climbed": false, "date": ""}, {"rank": 83, "name": "천성산", "height": "922m", "region": "경남", "xPct": 64.01, "yPct": 63.61, "approx": false, "climbed": false, "date": ""}, {"rank": 84, "name": "천태산", "height": "715m", "region": "충북", "xPct": 42.17, "yPct": 44.75, "approx": false, "climbed": false, "date": ""}, {"rank": 85, "name": "청량산", "height": "870m", "region": "경북", "xPct": 59.8, "yPct": 35.8, "approx": false, "climbed": false, "date": ""}, {"rank": 86, "name": "청계산", "height": "618m", "region": "경기", "xPct": 35.5, "yPct": 22.8, "approx": true, "climbed": false, "date": ""}, {"rank": 87, "name": "추월산", "height": "731m", "region": "전남", "xPct": 32.19, "yPct": 59.98, "approx": false, "climbed": false, "date": ""}, {"rank": 88, "name": "축령산", "height": "879m", "region": "경기", "xPct": 40.0, "yPct": 18.2, "approx": true, "climbed": false, "date": ""}, {"rank": 89, "name": "치악산 비로봉", "height": "1288m", "region": "강원", "xPct": 50.1, "yPct": 23.33, "approx": false, "climbed": false, "date": ""}, {"rank": 90, "name": "칠갑산", "height": "561m", "region": "충남", "xPct": 32.48, "yPct": 40.45, "approx": false, "climbed": false, "date": ""}, {"rank": 91, "name": "태백산", "height": "1567m", "region": "강원", "xPct": 60.53, "yPct": 30.12, "approx": false, "climbed": false, "date": ""}, {"rank": 92, "name": "태화산(영월)", "height": "1027m", "region": "강원", "xPct": 55.45, "yPct": 29.54, "approx": false, "climbed": false, "date": ""}, {"rank": 93, "name": "팔봉산(홍천)", "height": "327m", "region": "강원", "xPct": 44.75, "yPct": 18.64, "approx": false, "climbed": false, "date": ""}, {"rank": 94, "name": "팔공산", "height": "1192m", "region": "경북", "xPct": 56.63, "yPct": 49.33, "approx": false, "climbed": false, "date": ""}, {"rank": 95, "name": "팔영산", "height": "608m", "region": "전남", "xPct": 39.5, "yPct": 74.01, "approx": false, "climbed": false, "date": ""}, {"rank": 96, "name": "한라산", "height": "1947m", "region": "제주", "xPct": 19.5, "yPct": 92.5, "approx": true, "climbed": false, "date": ""}, {"rank": 97, "name": "화악산", "height": "1468m", "region": "경기", "xPct": 42.5, "yPct": 12.5, "approx": true, "climbed": false, "date": ""}, {"rank": 98, "name": "화왕산", "height": "757m", "region": "경남", "xPct": 53.64, "yPct": 60.18, "approx": false, "climbed": false, "date": ""}, {"rank": 99, "name": "황매산", "height": "1113m", "region": "경남", "xPct": 47.38, "yPct": 58.74, "approx": false, "climbed": false, "date": ""}, {"rank": 100, "name": "황석산", "height": "1192m", "region": "경남", "xPct": 44.66, "yPct": 56.59, "approx": false, "climbed": false, "date": ""}];
+
+const STORAGE_KEY = 'BAC100_USER_DATA_V1';
+
+let currentFilter = '전체';
+let currentSearch = '';
+let selectedRank = null;
+
+// 로컬 스토리지에서 등반 정보 불러오기
+function loadSavedData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      parsed.forEach(savedItem => {
+        const target = MOUNTAINS.find(m => m.rank === savedItem.rank);
+        if (target) {
+          target.climbed = savedItem.climbed || false;
+          target.date = savedItem.date || '';
+        }
+      });
+    } catch(e) {
+      console.error('데이터 불러오기 실패:', e);
+    }
+  }
+}
+
+// 로컬 스토리지에 자동 저장
+function saveData() {
+  const dataToSave = MOUNTAINS.map(m => ({
+    rank: m.rank,
+    climbed: m.climbed,
+    date: m.date
+  }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+  updateProgress();
+}
+
+function updateProgress() {
+  const climbedCount = MOUNTAINS.filter(m => m.climbed).length;
+  const pct = Math.round((climbedCount / MOUNTAINS.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').innerText = `${climbedCount} / 100 완등 (${pct}%)`;
+}
+
+function initChips() {
+  const regions = ['전체', '완등', '미완등', '강원', '경기', '서울', '충북', '충남', '경북', '경남', '전북', '전남', '지리산', '인천', '제주'];
+  const chipsEl = document.getElementById('regionChips');
+  chipsEl.innerHTML = '';
+  regions.forEach(r => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (r === currentFilter ? ' active' : '');
+    chip.innerText = r;
+    chip.onclick = () => {
+      currentFilter = r;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderList();
+    };
+    chipsEl.appendChild(chip);
+  });
+}
+
+function getFilteredList() {
+  return MOUNTAINS.filter(m => {
+    if (currentFilter === '완등' && !m.climbed) return false;
+    if (currentFilter === '미완등' && m.climbed) return false;
+    if (currentFilter !== '전체' && currentFilter !== '완등' && currentFilter !== '미완등' && m.region !== currentFilter) return false;
+    if (currentSearch.trim()) {
+      return m.name.toLowerCase().includes(currentSearch.trim().toLowerCase());
+    }
+    return true;
+  });
+}
+
+function renderList() {
+  const listEl = document.getElementById('listEl');
+  listEl.innerHTML = '';
+  const filtered = getFilteredList();
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div style="padding:30px;text-align:center;color:#888;">검색 결과가 없습니다.</div>';
+    return;
+  }
+
+  filtered.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'row' + (m.climbed ? ' climbed' : '') + (m.rank === selectedRank ? ' selected' : '');
+    row.id = `row-${m.rank}`;
+    
+    row.innerHTML = `
+      <div class="name">
+        #${m.rank} ${m.name} <span class="region-tag">[${m.region}]</span>${m.approx ? '<span class="approx-mark">*</span>' : ''}
+      </div>
+      <div class="height">${m.height}</div>
+      <div onclick="event.stopPropagation()">
+        <input type="date" value="${m.date}" onchange="updateDate(${m.rank}, this.value)">
+      </div>
+      <div style="text-align:center;" onclick="event.stopPropagation()">
+        <button class="dot-btn climb-btn ${m.climbed ? 'on' : ''}" onclick="setClimb(${m.rank}, true)"></button>
+      </div>
+      <div style="text-align:center;" onclick="event.stopPropagation()">
+        <button class="dot-btn unclimb-btn ${!m.climbed ? 'on' : ''}" onclick="setClimb(${m.rank}, false)"></button>
+      </div>
+    `;
+
+    row.onclick = () => selectMountain(m.rank);
+    listEl.appendChild(row);
+  });
+}
+
+function renderMarkers() {
+  const mapWrap = document.getElementById('mapWrap');
+  document.querySelectorAll('.marker').forEach(el => el.remove());
+
+  MOUNTAINS.forEach(m => {
+    const marker = document.createElement('div');
+    marker.className = 'marker ' + (m.climbed ? 'climbed' : 'unclimbed') + (m.approx ? ' approx' : '');
+    marker.id = `marker-${m.rank}`;
+    marker.style.left = m.xPct + '%';
+    marker.style.top = m.yPct + '%';
+    marker.title = `#${m.rank} ${m.name} (${m.height})`;
+
+    marker.onclick = (e) => {
+      e.stopPropagation();
+      selectMountain(m.rank);
+      const rowEl = document.getElementById(`row-${m.rank}`);
+      if (rowEl) rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    mapWrap.appendChild(marker);
+  });
+}
+
+function selectMountain(rank) {
+  selectedRank = rank;
+  document.querySelectorAll('.row').forEach(r => r.classList.remove('selected'));
+  document.querySelectorAll('.marker').forEach(m => m.classList.remove('pulse'));
+
+  const selRow = document.getElementById(`row-${rank}`);
+  if (selRow) selRow.classList.add('selected');
+
+  const selMarker = document.getElementById(`marker-${rank}`);
+  if (selMarker) selMarker.classList.add('pulse');
+}
+
+function setClimb(rank, climbed) {
+  const m = MOUNTAINS.find(item => item.rank === rank);
+  if (m) {
+    m.climbed = climbed;
+    if (climbed && !m.date) {
+      const today = new Date().toISOString().split('T')[0];
+      m.date = today;
+    }
+    saveData();
+    renderList();
+    renderMarkers();
+    selectMountain(rank);
+  }
+}
+
+function updateDate(rank, dateVal) {
+  const m = MOUNTAINS.find(item => item.rank === rank);
+  if (m) {
+    m.date = dateVal;
+    if (dateVal && !m.climbed) {
+      m.climbed = true;
+    }
+    saveData();
+    renderList();
+    renderMarkers();
+  }
+}
+
+document.getElementById('searchInput').oninput = (e) => {
+  currentSearch = e.target.value;
+  renderList();
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  if (confirm('모든 등반 기록과 일자를 초기화하시겠습니까?')) {
+    MOUNTAINS.forEach(m => {
+      m.climbed = false;
+      m.date = '';
+    });
+    saveData();
+    renderList();
+    renderMarkers();
+  }
+};
+
+document.getElementById('exportBtn').onclick = () => {
+  const exportData = MOUNTAINS.map(m => ({ rank: m.rank, climbed: m.climbed, date: m.date }));
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `BAC100_등반기록_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+};
+
+document.getElementById('importBtn').onclick = () => {
+  document.getElementById('importFile').click();
+};
+
+document.getElementById('importFile').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      imported.forEach(item => {
+        const target = MOUNTAINS.find(m => m.rank === item.rank);
+        if (target) {
+          target.climbed = !!item.climbed;
+          target.date = item.date || '';
+        }
+      });
+      saveData();
+      renderList();
+      renderMarkers();
+      alert('성공적으로 기록을 복구했습니다.');
+    } catch(err) {
+      alert('올바른 파일 형식이 아닙니다.');
+    }
+  };
+  reader.readAsText(file);
+};
+
+// PWA 서비스 워커 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(() => {
+      console.log('PWA Service Worker Registered');
+    }).catch(err => console.log('SW Registration failed:', err));
+  });
+}
+
+// 초기화
+window.onload = () => {
+  loadSavedData();
+  initChips();
+  renderList();
+  renderMarkers();
+  updateProgress();
+};
+</script>
+</body>
+</html>

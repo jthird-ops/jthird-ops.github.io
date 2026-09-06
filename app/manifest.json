@@ -1,0 +1,17 @@
+{
+  "name": "블랙야크 100대 명산 트래커",
+  "short_name": "BAC100",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><path d='M20 75 L50 25 L80 75 Z' fill='%23ffffff'/><path d='M40 75 L50 55 L60 75 Z' fill='%231f9d55'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

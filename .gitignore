@@ -1,0 +1,21 @@
+# API 인증키 — 절대 저장소에 올리지 말 것
+.env
+
+# 파이썬 캐시
+__pycache__/
+*.pyc
+
+# 사진 후보 탐색 중간 산출물
+data/photo_candidates*.json
+
+# 사진 고르기용 컨택트 시트 (작업용, 배포 대상 아님)
+_sheets/
+data/kto_candidates*.json
+data/tour_candidates.json
+
+# 방명록 Firebase 설정 — 비밀은 아니지만(브라우저로 내려가는 값이다)
+# 배포마다 다른 값이라 저장소에는 두지 않는다. 본보기는 firebase.example.json
+data/firebase.json
+
+# 예전 출력 폴더 (지금은 docs/ 를 쓴다)
+build/
