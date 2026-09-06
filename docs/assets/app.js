@@ -10,6 +10,20 @@
 })();
 
 (function () {
+  // 좁은 화면의 상단 메뉴 띠 — 끝까지 넘기면 오른쪽 흐림을 없앤다
+  var nav = document.querySelector('header.site nav');
+  if (nav) {
+    var mark = function () {
+      var end = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 2;
+      nav.classList.toggle('at-end', end);
+    };
+    nav.addEventListener('scroll', mark, { passive: true });
+    window.addEventListener('resize', mark);
+    mark();
+  }
+})();
+
+(function () {
   // 첫 페이지 4개 메뉴 — 누르면 해당 내용만 보여준다
   var menu = document.getElementById('menu');
   if (!menu) return;
@@ -28,7 +42,9 @@
       var panel = document.getElementById(id);
       var tall = menu.getBoundingClientRect().height > window.innerHeight * 0.55;
       var target = (tall && panel) ? panel : menu;
-      var top = target.getBoundingClientRect().top + window.pageYOffset - 62;
+      var hdr = document.querySelector('header.site');
+      var off = (hdr ? hdr.getBoundingClientRect().height : 60) + 8;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - off;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
   }

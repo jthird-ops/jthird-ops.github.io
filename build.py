@@ -1255,7 +1255,20 @@ footer.site p{margin:0 0 6px}
   .side{position:static;flex-direction:row;flex-wrap:wrap}
   .minimap{flex:1 1 260px}
   .fact{flex:1;min-width:200px}
-  header.site nav{display:none}
+  /* 좁은 화면에서는 메뉴를 숨기지 않고 가로로 넘기는 띠로 바꾼다.
+     예전에는 통째로 감춰서 방명록 같은 곳에 갈 길이 푸터밖에 없었다. */
+  header.site{flex-wrap:wrap;gap:8px 16px;padding:10px 16px}
+  header.site nav{display:flex;order:3;width:100%;gap:0;font-size:13px;
+    overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    margin:0 -16px;padding:2px 16px 0}
+  header.site nav::-webkit-scrollbar{display:none}
+  header.site nav a{flex:0 0 auto;padding:6px 11px;border-radius:999px;
+    white-space:nowrap}
+  header.site nav a:first-child{padding-left:0}
+  /* 오른쪽 끝을 흐리게 해서 '더 있다'는 걸 알린다 */
+  header.site nav{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);
+    mask-image:linear-gradient(to right,#000 88%,transparent)}
+  header.site nav.at-end{-webkit-mask-image:none;mask-image:none}
   .stats{gap:24px}
 }
 """
@@ -1269,6 +1282,20 @@ JS = r"""
       if (g.dataset.region === r) g.classList.add('on');
     });
   });
+})();
+
+(function () {
+  // 좁은 화면의 상단 메뉴 띠 — 끝까지 넘기면 오른쪽 흐림을 없앤다
+  var nav = document.querySelector('header.site nav');
+  if (nav) {
+    var mark = function () {
+      var end = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 2;
+      nav.classList.toggle('at-end', end);
+    };
+    nav.addEventListener('scroll', mark, { passive: true });
+    window.addEventListener('resize', mark);
+    mark();
+  }
 })();
 
 (function () {
@@ -1290,7 +1317,9 @@ JS = r"""
       var panel = document.getElementById(id);
       var tall = menu.getBoundingClientRect().height > window.innerHeight * 0.55;
       var target = (tall && panel) ? panel : menu;
-      var top = target.getBoundingClientRect().top + window.pageYOffset - 62;
+      var hdr = document.querySelector('header.site');
+      var off = (hdr ? hdr.getBoundingClientRect().height : 60) + 8;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - off;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
   }
