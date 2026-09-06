@@ -191,11 +191,13 @@
  },
  "도봉산": {
   "file": "도봉산.jpg",
-  "title": "Peak on Mount Dobongsan.JPG",
-  "author": "Kellnerp",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3APeak_on_Mount_Dobongsan.JPG"
+  "title": "KakaoTalk_20250605_191621314_06.jpg",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-06-05"
  },
  "두타산": {
   "file": "두타산.jpg",
