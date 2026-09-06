@@ -1434,6 +1434,10 @@ def main():
         base, ext = name.rsplit('.', 1)
         rel = f'assets/{base}.{h}.{ext}'
         open(os.path.join(OUT, rel), 'w', encoding='utf-8').write(text)
+        # 예전 이름으로도 같은 내용을 남긴다. 방문자 브라우저에 옛 HTML 이
+        # 캐시돼 있으면 그것은 assets/style.css 를 찾는데, 그 경로가 없으면
+        # 스타일이 통째로 빠진 화면을 보게 된다.
+        open(os.path.join(OUT, f'assets/{name}'), 'w', encoding='utf-8').write(text)
         ASSET[kind] = rel
 
     put('css', 'style.css', CSS + _guestbook.CSS + _appcount.CSS + _appshot.CSS)
