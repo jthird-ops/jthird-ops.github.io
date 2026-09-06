@@ -67,9 +67,12 @@ updated     기준 일자
 이름이 URL을 정합니다.
 
 ```
-bac100                → https://<아이디>.github.io/bac100/
-<아이디>.github.io     → https://<아이디>.github.io/
+<아이디>.github.io     → https://<아이디>.github.io/       (지금 이 방식)
+그 밖의 이름           → https://<아이디>.github.io/<이름>/
 ```
+
+저장소 이름을 계정 아이디와 같게(`jthird-ops.github.io`) 두었습니다. 네이버
+서치어드바이저가 하위 경로를 받지 않고 호스트 단위만 받기 때문입니다.
 
 이 사이트는 모든 링크가 상대경로라 어느 쪽이든 그대로 동작합니다.
 

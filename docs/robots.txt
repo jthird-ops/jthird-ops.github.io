@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jthird-ops.github.io/bac100/sitemap.xml
+Sitemap: https://jthird-ops.github.io/sitemap.xml

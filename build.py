@@ -22,7 +22,7 @@ VISITS = {'js': '', 'html': ''}
 
 # 배포 주소. og:image·canonical·sitemap 은 절대 주소여야 해서 필요하다.
 # 도메인을 옮기면 이 값만 고치면 된다.
-SITE_URL = "https://jthird-ops.github.io/bac100/"
+SITE_URL = "https://jthird-ops.github.io/"
 
 SITE = "블랙야크 100대 명산 기록"
 TAGLINE = "100개 산, 100개의 기록 — 코스·난이도·인증장소를 한 곳에"
