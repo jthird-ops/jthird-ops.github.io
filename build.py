@@ -36,6 +36,9 @@ VISITS = {'js': '', 'html': ''}
 SITE_URL = "https://jthird-ops.github.io/"
 
 # 검색엔진 사이트 소유확인. 등록할 때 받은 값을 넣는다. 빈 값은 나가지 않는다.
+# 다음 웹마스터도구 소유 확인 — robots.txt 맨 끝에 한 줄로 들어간다
+DAUM_PIN = 'j!76085593'
+
 VERIFY = {
     "naver-site-verification": "b875b07332feb15b1f88e64db570658ec357757e",
     "google-site-verification": "5BFFeaf_HVuRt1YrPSbNKNMxJ4LbtXOB9mh8F-GnnmQ",
@@ -610,6 +613,7 @@ def build_index(mts):
            <b>홈 화면에 추가</b>를 고르면 아이콘이 생깁니다. 아이폰은 사파리의 공유 단추,
            안드로이드는 크롬 우측 상단 메뉴에 있습니다.</p>
       </div>
+      <p class="more-link"><a href="app-guide.html">어플 사용방법 자세히 보기 →</a></p>
       {_appshot.block(kmap, mts)}
       <p class="app-warn">기록은 어플을 연 브라우저 안에만 저장됩니다. 서버로 보내지
          않으므로 다른 기기에서 열면 기록이 보이지 않고, 브라우저 데이터를 지우면
@@ -623,6 +627,201 @@ def build_index(mts):
                 desc="블랙야크 100대명산(BAC) 100개 산의 등산 코스, 난이도, 정상 인증장소를 지역별 목록과 지도로 한눈에 정리했습니다.",
                 og_type="website",
                 extra_head=INDEX_LD + _appcount.js(_guestbook.config()))
+
+
+# ---------------------------------------------------------------- 어플 사용방법
+GUIDE_TITLE = "블랙야크 100대명산 등반기록 어플 사용방법 | 완등 기록·지도·백업"
+GUIDE_DESC = ("블랙야크 100대명산 완등 기록 어플 사용법. 설치 없이 열고, 다녀온 산을 "
+              "날짜와 함께 기록해 지도에서 초록·빨강으로 확인하는 방법과 백업·복구까지 정리했어요.")
+GUIDE_CSS = """<style>
+.guide{max-width:860px;margin:0 auto;padding:26px 20px 56px}
+.guide .lead{font-size:17px;color:var(--sub);margin:10px 0 0}
+.guide h2{font-size:22px;margin:44px 0 14px;padding-top:6px}
+.guide h3{font-size:17px;margin:0 0 4px}
+.g-cta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 6px}
+.g-cta a{display:inline-block;padding:11px 20px;border-radius:999px;font-weight:700;font-size:15px;
+  border:1.5px solid var(--green);background:var(--green);color:#fff}
+.g-cta a:hover{background:#188044;border-color:#188044}
+.g-cta a.outline{background:transparent;color:var(--green)}
+.g-cta a.outline:hover{background:var(--green-soft)}
+.g-why{background:var(--green-soft);border-radius:14px;padding:16px 20px;margin:22px 0 0}
+.g-why h2{font-size:18px;margin:0 0 6px;padding:0}
+.g-why p{margin:0 0 8px}
+.g-why p:last-child{margin:0}
+.g-toc{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 18px;margin:26px 0 0;font-size:15px}
+.g-toc ol{margin:6px 0 0;padding-left:20px;columns:2;column-gap:28px}
+.g-toc a{color:var(--green)}
+.g-shot{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.g-shot svg{display:block;width:100%;height:auto}
+.g-shot figcaption{font-size:13px;color:var(--sub);margin-top:8px}
+.g-parts{margin:14px 0 0;padding-left:20px}
+.g-mobile{margin:30px 0 0}
+.g-mobile p{margin:6px 0 14px}
+.g-phones{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:620px}
+.g-phones figure{margin:0}
+.g-phones img{display:block;width:100%;height:auto;border:8px solid #1b1f24;border-radius:26px;
+  background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.g-phones figcaption{font-size:13px;color:var(--sub);text-align:center;margin-top:8px}
+.g-steps{list-style:none;margin:0;padding:0;counter-reset:st}
+.g-steps>li{position:relative;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:16px 18px 14px 62px;margin:0 0 12px;counter-increment:st}
+.g-steps>li::before{content:counter(st);position:absolute;left:18px;top:16px;width:30px;height:30px;
+  border-radius:50%;background:var(--green);color:#fff;font-weight:700;display:grid;place-items:center;font-size:15px}
+.g-steps p{margin:4px 0 0;color:var(--ink)}
+.g-steps .tip{font-size:14px;color:var(--sub)}
+.g-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin:0 2px}
+.g-dot.on{background:#1f9d55}.g-dot.off{background:#d64545}
+.g-note{background:var(--green-soft);border-radius:14px;padding:14px 18px}
+.g-note ul{margin:0;padding-left:20px}
+.g-faq dt{font-weight:700;margin-top:14px}
+.g-faq dd{margin:4px 0 0;color:var(--ink)}
+.guide kbd{font:inherit;font-size:14px;background:#f1f3f5;border:1px solid var(--line);
+  border-radius:6px;padding:0 6px}
+@media (max-width:640px){.g-toc ol{columns:1}.g-steps>li{padding-left:56px}
+  .g-phones{gap:10px}.g-phones img{border-width:5px;border-radius:18px}}
+</style>
+"""
+
+
+def build_app_guide(mts, kmap):
+    """어플(등반 트래커) 사용방법 페이지. 검색 유입·홍보 링크용 독립 페이지."""
+    import _appshot
+    body = f"""
+<article class="guide">
+  <p class="crumb"><a href="index.html#tab-app">← 어플 소개로</a></p>
+  <h1>블랙야크 100대명산 등반기록 어플 사용방법</h1>
+  <p class="lead">다녀온 산을 날짜와 함께 기록하면 지도에서 완등한 산은 초록, 남은 산은
+     빨강으로 보여 주는 무료 어플이에요. 회원가입이나 설치 없이 바로 써요.</p>
+  <section class="g-why">
+    <h2>엑셀·수첩 기록을 지도 위로 옮기세요</h2>
+    <p>블랙야크 100대명산에 도전하면서 완등한 산을 엑셀에 따로 정리하거나 수첩에 적어 두셨다면,
+       이제 그 기록을 지도와 함께 한곳에서 관리할 수 있어요. 완등한 산을 체크하면 지도에 바로 초록으로 표시되어
+       <b>어느 지역이 아직 비어 있는지</b> 한눈에 보여요.</p>
+    <p>지역별로 남은 산을 모아 보고, 목록의 높이와 이 사이트의 산별 <b>코스·난이도</b> 정보를 함께 살펴
+       다음 목표를 정해 보세요. 초록 점이 하나씩 늘어나는 지도가 100대명산 완등까지 가는 길에
+       좋은 동기부여가 돼요.</p>
+  </section>
+  <div class="g-cta">
+    <a href="index.html#tab-app">어플 바로 열기</a>
+    <a class="outline" href="app/bac100-tracker.html" download="bac100-tracker.html">파일로 내려받기</a>
+  </div>
+
+  <nav class="g-toc" aria-label="목차"><b>목차</b>
+    <ol>
+      <li><a href="#g-screen">화면 구성 (컴퓨터·휴대폰)</a></li>
+      <li><a href="#g-open">어플 여는 법</a></li>
+      <li><a href="#g-record">완등 기록하기</a></li>
+      <li><a href="#g-find">산 찾기·남은 산 보기</a></li>
+      <li><a href="#g-backup">백업과 복구</a></li>
+      <li><a href="#g-note">꼭 알아둘 점</a></li>
+      <li><a href="#g-faq">자주 묻는 질문</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="g-screen">1. 화면 구성 (컴퓨터·휴대폰)</h2>
+  <figure class="g-shot">
+    {_appshot.svg(kmap, mts)}
+    <figcaption>어플과 같은 지도 데이터로 그린 화면이에요. 실제 화면과 배치는 같고 색·글꼴은 조금 다를 수 있어요.</figcaption>
+  </figure>
+  <ul class="g-parts">
+    <li><b>맨 위 진행률</b> — <code>37 / 100 완등 (37%)</code>처럼 지금까지 오른 산의 수가 나와요.</li>
+    <li><b>검색창·칩</b> — 산 이름으로 찾거나, 지역·완등 여부로 목록을 걸러요.</li>
+    <li><b>왼쪽 목록</b> — 100개 산이 한 줄씩. 줄마다 <b>등반일시</b> 칸과
+        <b>등반</b>·<b>미등반</b> 동그라미가 있어요.</li>
+    <li><b>오른쪽 지도</b> — 같은 산이 점으로 찍혀요. <span class="g-dot on"></span>초록은 완등,
+        <span class="g-dot off"></span>빨강은 미완등이에요.</li>
+  </ul>
+
+  <div class="g-mobile">
+    <h3>스마트폰에서도 그대로 써요</h3>
+    <p>휴대폰에서 열면 화면 폭에 맞춰 목록과 지도가 위아래로 나뉘어요. 기능은 컴퓨터와 같고,
+       산행을 마치고 내려오는 길에 바로 기록할 수 있어요.</p>
+    <div class="g-phones">
+      <figure><img src="{img('assets/photos/app-mobile-list.jpg')}" width="600" height="891" loading="lazy"
+           alt="스마트폰에서 본 어플 목록 화면. 완등한 산은 초록 줄과 등반 날짜로 표시된다">
+        <figcaption>목록 — 등반 동그라미와 날짜</figcaption></figure>
+      <figure><img src="{img('assets/photos/app-mobile-map.jpg')}" width="600" height="891" loading="lazy"
+           alt="스마트폰에서 본 어플 지도 화면. 완등한 산은 초록, 남은 산은 빨강 점으로 표시된다">
+        <figcaption>지도 — 완등 초록, 미완등 빨강</figcaption></figure>
+    </div>
+  </div>
+
+  <h2 id="g-open">2. 어플 여는 법</h2>
+  <ol class="g-steps">
+    <li><h3>휴대폰 — 바로 열고 홈 화면에 추가</h3>
+      <p><b>어플 바로 열기</b>를 누른 뒤 브라우저 메뉴에서 <b>홈 화면에 추가</b>를 고르면
+         바탕화면에 아이콘이 생겨요. 다음부터는 아이콘만 누르면 돼요.</p>
+      <p class="tip">아이폰: 사파리 아래쪽 공유 단추 → 홈 화면에 추가 · 안드로이드: 크롬 오른쪽 위 ⋮ → 홈 화면에 추가</p></li>
+    <li><h3>컴퓨터 — 파일로 내려받아 두 번 클릭</h3>
+      <p><b>파일로 내려받기</b>를 누르면 <code>bac100-tracker.html</code>(약 110KB) 파일 하나를 받게 돼요.
+         두 번 누르면 브라우저에서 열리고, 인터넷이 없어도 동작해요.</p></li>
+  </ol>
+
+  <h2 id="g-record">3. 완등 기록하기</h2>
+  <ol class="g-steps">
+    <li><h3>다녀온 산의 <span class="g-dot on"></span>등반 동그라미 누르기</h3>
+      <p>줄이 초록으로 바뀌고 지도의 점도 초록이 돼요. 날짜 칸이 비어 있으면
+         <b>오늘 날짜가 자동으로</b> 들어가요.</p></li>
+    <li><h3>예전에 다녀온 산은 날짜부터 넣기</h3>
+      <p><b>등반일시</b> 칸을 눌러 달력에서 날짜를 고르면, 등반 동그라미를 따로 누르지 않아도
+         완등으로 처리돼요.</p></li>
+    <li><h3>잘못 눌렀다면 <span class="g-dot off"></span>미등반 누르기</h3>
+      <p>미완등으로 되돌아가요. 적어 둔 날짜는 그대로 남으니 필요하면 날짜 칸을 지우세요.</p></li>
+    <li><h3>저장 버튼은 없어요</h3>
+      <p>누르는 순간 이 기기에 <b>자동 저장</b>되고, 다음에 열면 그대로 복원돼요.</p></li>
+  </ol>
+
+  <h2 id="g-find">4. 산 찾기·남은 산 보기</h2>
+  <ol class="g-steps">
+    <li><h3>이름으로 찾기</h3>
+      <p>검색창에 <kbd>설악</kbd>처럼 일부만 넣어도 바로 걸러져요.</p></li>
+    <li><h3>지역·완등 여부로 거르기</h3>
+      <p>칩에서 <b>강원</b>·<b>경남</b> 같은 지역을 누르거나, <b>미완등</b>을 눌러 아직 못 간 산만 모아 봐요.
+         다음 산행지를 고를 때 편해요.</p></li>
+    <li><h3>지도에서 고르기</h3>
+      <p>지도의 점을 누르면 목록이 그 산의 줄로 이동하고, 목록의 줄을 누르면 지도의 점이 깜빡여요.</p></li>
+  </ol>
+
+  <h2 id="g-backup">5. 백업과 복구</h2>
+  <ol class="g-steps">
+    <li><h3>백업(내보내기)</h3>
+      <p>맨 위 <b>백업(내보내기)</b>를 누르면 <code>BAC100_등반기록_날짜.json</code> 파일이 저장돼요.
+         기록이 쌓일 때마다 한 번씩 받아 두세요.</p></li>
+    <li><h3>복구(불러오기)</h3>
+      <p>새 휴대폰·다른 컴퓨터·다른 브라우저에서 어플을 열고 <b>복구(불러오기)</b>를 눌러
+         백업 파일을 고르면 기록이 그대로 돌아와요.</p>
+      <p class="tip">휴대폰 기록을 컴퓨터로 옮길 때도 같은 방법을 써요. 백업 파일을 카톡 나에게 보내기나 메일로 옮기면 돼요.</p></li>
+  </ol>
+
+  <h2 id="g-note">6. 꼭 알아둘 점</h2>
+  <div class="g-note"><ul>
+    <li>기록은 <b>어플을 연 브라우저 안에만</b> 저장돼요. 서버로 보내지 않으므로 다른 사람이 볼 수 없어요.</li>
+    <li>브라우저의 <b>사이트 데이터·쿠키를 지우면 기록도 사라져요.</b> 백업 파일을 꼭 받아 두세요.</li>
+    <li><b>바로 열기</b>로 연 어플과 <b>내려받은 파일</b>은 저장 장소가 서로 달라요. 한쪽만 정해서 쓰세요.</li>
+    <li><b>전체 초기화</b>는 모든 완등 기록과 날짜를 지워요. 누르기 전에 백업하세요.</li>
+  </ul></div>
+
+  <h2 id="g-faq">7. 자주 묻는 질문</h2>
+  <dl class="g-faq">
+    <dt>돈이 드나요? 회원가입이 필요한가요?</dt>
+    <dd>둘 다 아니에요. 무료이고 가입 없이 바로 써요.</dd>
+    <dt>블랙야크 공식 인증을 대신하나요?</dt>
+    <dd>아니에요. 이 어플은 개인 기록용이에요. 완등 인증은 블랙야크 공식 앱(BAC)에서 따로 해야 해요.
+        <a href="index.html#tab-auth">인증방법 보기 →</a></dd>
+    <dt>산속에서 인터넷이 안 돼도 되나요?</dt>
+    <dd>내려받은 파일은 인터넷 없이 열려요. 산행 중 기록은 정상에서 하지 않아도 되니, 내려와서 날짜와 함께 적어도 돼요.</dd>
+    <dt>휴대폰을 바꾸면 기록이 없어지나요?</dt>
+    <dd>기존 휴대폰에서 백업(내보내기)한 파일을 새 휴대폰에서 복구(불러오기)하면 그대로 옮겨져요.</dd>
+  </dl>
+
+  <div class="g-cta">
+    <a href="index.html#tab-app">어플 바로 열기</a>
+    <a class="outline" href="index.html#tab-list">100대 명산 목록 보기</a>
+  </div>
+</article>
+"""
+    return page(GUIDE_TITLE, body, 0, GUIDE_DESC, GUIDE_CSS, path='app-guide.html')
 
 
 # ---------------------------------------------------------------- 사진 출처
@@ -1546,6 +1745,9 @@ def main():
     open(os.path.join(OUT, 'credits.html'), 'w', encoding='utf-8').write(
         build_credits(mts, photos))
 
+    open(os.path.join(OUT, 'app-guide.html'), 'w', encoding='utf-8').write(
+        build_app_guide(mts, kmap))
+
     for i, m in enumerate(mts):
         prev = mts[i - 1] if i > 0 else None
         nxt = mts[i + 1] if i < len(mts) - 1 else None
@@ -1554,7 +1756,7 @@ def main():
 
     # 검색엔진용 — 어떤 주소가 있는지 알려준다
     today = datetime.date.today().isoformat()
-    urls = [('', '1.0'), ('guestbook.html', '0.5'), ('credits.html', '0.3')]
+    urls = [('', '1.0'), ('app-guide.html', '0.7'), ('guestbook.html', '0.5'), ('credits.html', '0.3')]
     urls += [(f"mountain/{m['slug']}.html", '0.8') for m in mts]
     sitemap = ['<?xml version="1.0" encoding="UTF-8"?>',
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -1566,10 +1768,11 @@ def main():
         '\n'.join(sitemap))
 
     open(os.path.join(OUT, 'robots.txt'), 'w', encoding='utf-8').write(
-        f'User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n')
+        f'User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n'
+        + (f'#DaumWebMasterTool:{DAUM_PIN}\n' if DAUM_PIN else ''))
 
     written = sum(1 for m in mts if m['content'])
-    print(f'생성 완료: 페이지 {len(mts) + 2}개 (본문 작성 {written}/100)')
+    print(f'생성 완료: 페이지 {len(mts) + 3}개 (본문 작성 {written}/100)')
     print('→', os.path.join(OUT, 'index.html'))
 
 
