@@ -243,7 +243,7 @@ def load():
 
 
 # ---------------------------------------------------------------- 공통 셸
-def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
+def page(title, body, depth=0, desc="", extra_head="", image="", path="", og_type="article"):
     up = '../' * depth
     # 파일 이름이 한글이라 og:image·canonical 은 퍼센트 인코딩해 둔다.
     # 카카오톡·페이스북 크롤러가 원문 UTF-8 주소를 못 읽는 경우가 있다.
@@ -261,7 +261,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
 <meta name="description" content="{e(desc or TAGLINE)}">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc or TAGLINE)}">
-<meta property="og:type" content="article">
+<meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="{e(SITE)}">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="{SITE_URL}{path}">
@@ -317,6 +317,12 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path=""):
 
 
 # ---------------------------------------------------------------- 홈
+INDEX_LD = '''<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"블랙야크 100대명산 기록","alternateName":["블랙야크 100대 명산","BAC 100대명산"],"url":"https://jthird-ops.github.io/","inLanguage":"ko-KR"}
+</script>
+'''
+
+
 def build_index(mts):
     import _guestbook, _appcount           # 방명록·다운로드 수 (Firebase)
     import _appshot                        # 어플 소개와 화면
@@ -428,7 +434,7 @@ def build_index(mts):
   <div class="vhero-shade"></div>
   <div class="vhero-inner">
     <p class="eyebrow">BAC · BLACKYAK ALPINE CLUB</p>
-    <h1>100대 명산을<br>하나씩 기록합니다</h1>
+    <h1>블랙야크 100대명산을<br>하나씩 기록합니다</h1>
     <p class="lead">{e(TAGLINE)}</p>
   </div>
   {hero_credit}
@@ -613,8 +619,10 @@ def build_index(mts):
   </section>
 </div>
 """
-    return page(f"{SITE} — 100개 산 코스·난이도·인증장소 정리", body, 0,
-                extra_head=_appcount.js(_guestbook.config()))
+    return page("블랙야크 100대명산 | 100대 명산 코스·난이도·인증장소 총정리", body, 0,
+                desc="블랙야크 100대명산(BAC) 100개 산의 등산 코스, 난이도, 정상 인증장소를 지역별 목록과 지도로 한눈에 정리했습니다.",
+                og_type="website",
+                extra_head=INDEX_LD + _appcount.js(_guestbook.config()))
 
 
 # ---------------------------------------------------------------- 사진 출처
