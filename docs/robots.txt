@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://jthird-ops.github.io/sitemap.xml
+#DaumWebMasterTool:j!76085593
