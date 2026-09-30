@@ -1490,6 +1490,8 @@ section h2{font-size:24px;font-weight:750}
 .lg figcaption{font-size:12.5px;color:var(--sub);margin-top:6px;text-align:center}
 .lg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .lg-grid figure{margin:0}
+.lg-grid figure:only-child{grid-column:1/-1}
+.lg-grid figure:only-child img{aspect-ratio:auto}
 .lg-grid img{aspect-ratio:4/3;object-fit:cover}
 .lg-verdict{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);text-align:center}
 .lg-stars{color:#d9a441;font-size:20px;letter-spacing:2px}
