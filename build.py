@@ -326,6 +326,16 @@ INDEX_LD = '''<script type="application/ld+json">
 '''
 
 
+def done_badge(c):
+    """등반기록이 있는 산의 카드 사진 위 '완등' 배지. 가장 최근 산행 날짜를 쓴다."""
+    logs = (c or {}).get('log') or []
+    ds = sorted(x.get('date', '') for x in logs if x.get('date'))
+    if not logs:
+        return ''
+    d = ds[-1][2:].replace('-', '.') if ds else ''
+    return f'<span class="done-badge">✓ 완등{" " + d if d else ""}</span>'
+
+
 def build_index(mts):
     import _guestbook, _appcount           # 방명록·다운로드 수 (Firebase)
     import _appshot                        # 어플 소개와 화면
@@ -382,7 +392,7 @@ def build_index(mts):
         cards.append(f"""
       <a class="card{'' if c else ' todo'}" href="mountain/{e(m['slug'])}.html"
          data-region="{e(m['region'])}" data-name="{e(m['name'])}">
-        <span class="card-thumb">{thumb}</span>
+        <span class="card-thumb">{thumb}{done_badge(c)}</span>
         <span class="card-body">
           <span class="card-top"><i class="rank">{m['rank']}</i><i class="tag">{e(m['region'])}</i></span>
           <strong>{e(m['name'])}</strong>
@@ -416,7 +426,7 @@ def build_index(mts):
         pcards.append(f"""
       <a class="pcard" href="mountain/{e(m['slug'])}.html">
         <span class="pcard-img"><img src="{img("assets/photos/" + thumb_file(ph))}"
-             alt="{e(m['name'])} 사진" loading="lazy" decoding="async"></span>
+             alt="{e(m['name'])} 사진" loading="lazy" decoding="async">{done_badge(c)}</span>
         <span class="pcard-body">
           <span class="pc-top"><i>{e(m['region'])}</i><b>{e(m['height'])}</b></span>
           <strong>{e(m['name'])}</strong>
@@ -1425,7 +1435,9 @@ section h2{font-size:24px;font-weight:750}
   display:flex;flex-direction:column;overflow:hidden;transition:.15s}
 .card:hover{border-color:var(--green-2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(20,40,30,.09)}
 .card.todo{opacity:.62}
-.card-thumb{display:block;aspect-ratio:4/3;overflow:hidden;background:#e8ece9}
+.card-thumb{position:relative;display:block;aspect-ratio:4/3;overflow:hidden;background:#e8ece9}
+.pcard-img{position:relative}
+.done-badge{position:absolute;top:10px;left:10px;z-index:2;background:var(--green);color:#fff;font-size:12px;font-weight:700;font-style:normal;line-height:1;padding:6px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);letter-spacing:.2px;pointer-events:none}
 .card-thumb img,.card-thumb svg{width:100%;height:100%;object-fit:cover;display:block;
   transition:transform .45s ease}
 .card:hover .card-thumb img{transform:scale(1.05)}
