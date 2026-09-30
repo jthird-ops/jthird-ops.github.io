@@ -539,12 +539,13 @@
  },
  "용화산": {
   "file": "용화산.jpg",
-  "title": "화천 용화산",
-  "author": "강원지사 모먼트스튜디오",
-  "license": "공공누리 제1유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#01",
-  "source": "https://api.visitkorea.or.kr/",
-  "provider": "한국관광공사 포토코리아"
+  "title": "기암 능선과 구름바다",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-09-13"
  },
  "운악산": {
   "file": "운악산.jpg",
