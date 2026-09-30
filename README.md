@@ -52,6 +52,10 @@ season      계절 안내
 tips        알아두면 좋은 것 배열
 sources     [{title, url}]
 updated     기준 일자
+log         직접 다녀온 등반기록 배열 (선택). [{date, title, sub, weather, start,
+              stats: [[라벨, 값]], sections: [{heading, paras: [],
+              photos: [{file: assets/photos/ 기준 경로, caption}]}],
+              tips: [], rating(1~5), verdict}]
 ```
 
 ## GitHub Pages 로 올리기

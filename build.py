@@ -974,6 +974,53 @@ def food_html(food, mt_name=''):
     return ''.join(out)
 
 
+def log_html(logs, mt_name=''):
+    """직접 다녀온 등반기록. 최근 산행이 위로 온다.
+
+    사진은 assets/photos/ 아래 경로로 적는다. 한 문단 묶음에 사진이 한 장이면
+    크게, 여러 장이면 첫 장만 크게 두고 나머지는 두 칸 격자로 놓는다."""
+    if not logs:
+        return ''
+    out = []
+    for lg in sorted(logs, key=lambda x: x.get('date', ''), reverse=True):
+        d = lg.get('date', '')
+        chips = ''.join(f'<span class="lg-chip">{e(x)}</span>' for x in (
+            d.replace('-', '.'), lg.get('start') and f'{lg["start"]} 출발', lg.get('weather')) if x)
+        stats = ''.join(f'<div class="lg-stat"><b>{e(v)}</b><span>{e(k)}</span></div>'
+                        for k, v in lg.get('stats', []))
+        body = []
+        for s in lg.get('sections', []):
+            if s.get('heading'):
+                body.append(f'<h3>{e(s["heading"])}</h3>')
+            body += [f'<p>{e(p)}</p>' for p in s.get('paras', [])]
+            phs = s.get('photos', [])
+            def fig(p, cls='lg-fig'):
+                alt = p.get('caption') or f'{mt_name} 산행 사진'
+                cap = f'<figcaption>{e(p["caption"])}</figcaption>' if p.get('caption') else ''
+                return (f'<figure class="{cls}"><img src="../{img("assets/photos/" + p["file"])}" '
+                        f'alt="{e(alt)}" loading="lazy" decoding="async">{cap}</figure>')
+            if phs:
+                body.append(fig(phs[0]))
+            if len(phs) > 1:
+                body.append('<div class="lg-grid">' + ''.join(fig(p, 'lg-cell') for p in phs[1:]) + '</div>')
+        tips = lg.get('tips') or []
+        tips_html = ('<h3>다음에 갈 사람을 위한 팁</h3><ul class="tips">'
+                     + ''.join(f'<li>{e(x)}</li>' for x in tips) + '</ul>') if tips else ''
+        r = lg.get('rating')
+        verdict = ''
+        if r or lg.get('verdict'):
+            stars = (f'<span class="lg-stars" aria-label="별점 {r}/5">{"★" * r}{"☆" * (5 - r)}</span>'
+                     if r else '')
+            verdict = f'<div class="lg-verdict">{stars}<p>{e(lg.get("verdict", ""))}</p></div>'
+        out.append(
+            f'<article class="lg"><header class="lg-head"><b class="lg-title">{e(lg.get("title", ""))}</b>'
+            + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')
+            + f'<div class="lg-chips">{chips}</div></header>'
+            + (f'<div class="lg-stats">{stats}</div>' if stats else '')
+            + ''.join(body) + tips_html + verdict + '</article>')
+    return ''.join(out)
+
+
 def build_mountain(m, prev, nxt, kmap, photos):
     c = m['content']
     ph = photos.get(m['slug'])
@@ -1022,6 +1069,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
             for s in src) + '</ul>') if src else ''
 
         main = f"""<div class="lede">{intro}</div>
+    {section('등반기록', log_html(c.get('log'), m['name']))}
     {section('이 산의 포인트', hl_html)}
     {section('등산 코스', courses)}
     {section('인증장소', f'<p>{e(c["cert"])}</p>' if c.get('cert') else '')}
@@ -1425,6 +1473,28 @@ section h2{font-size:24px;font-weight:750}
 .hl li::before{content:"";position:absolute;left:4px;top:11px;width:7px;height:7px;border-radius:50%;background:var(--green-2)}
 .tips{padding-left:20px;margin:0}
 .tips li{margin-bottom:8px}
+.lg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 22px}
+.lg+.lg{margin-top:18px}
+.lg-title{display:block;font-size:18px;font-weight:750}
+.lg-sub{color:var(--sub);margin:4px 0 0;font-size:14px}
+.lg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lg-chip{font-size:12.5px;background:var(--green-soft);color:var(--green);border-radius:999px;padding:3px 10px;font-weight:600}
+.lg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+.lg-stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
+.lg-stat b{display:block;font-size:16px;color:var(--green)}
+.lg-stat span{font-size:12px;color:var(--sub)}
+.lg h3{font-size:16px;font-weight:750;margin:22px 0 8px}
+.lg figure{margin:14px 0}
+.lg img{width:100%;border-radius:10px;display:block}
+.lg-fig img{width:auto;max-width:100%;max-height:560px;margin:0 auto}
+.lg figcaption{font-size:12.5px;color:var(--sub);margin-top:6px;text-align:center}
+.lg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lg-grid figure{margin:0}
+.lg-grid img{aspect-ratio:4/3;object-fit:cover}
+.lg-verdict{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);text-align:center}
+.lg-stars{color:#d9a441;font-size:20px;letter-spacing:2px}
+.lg-verdict p{margin:6px 0 0}
+@media(max-width:560px){.lg{padding:16px}.lg-stats{grid-template-columns:repeat(2,1fr)}.lg-grid{grid-template-columns:1fr}}
 .notice{background:#fdf6e8;border:1px solid #f0dfb8;border-radius:10px;padding:11px 15px;font-size:13.5px;color:#7a5a12;margin:0 0 22px}
 .todo-msg{color:var(--sub)}
 
