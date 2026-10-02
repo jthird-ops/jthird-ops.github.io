@@ -52,6 +52,8 @@ season      계절 안내
 tips        알아두면 좋은 것 배열
 sources     [{title, url}]
 updated     기준 일자
+trailmap    옆칸의 위치 지도 대신 실을 등산지도 (선택). {file: assets/photos/ 기준
+              경로, caption}. 누르면 크게 보인다
 log         직접 다녀온 등반기록 배열 (선택). [{date, title, sub, weather, start,
               stats: [[라벨, 값]], sections: [{heading, paras: [],
               photos: [{file: assets/photos/ 기준 경로, caption}]}],

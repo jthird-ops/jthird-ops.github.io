@@ -1,5 +1,36 @@
 
 (function () {
+  // 등산지도: 누르면 화면 가득 띄우고, 한 번 더 누르면 원본 크기로 키워 끌어서 본다
+  document.querySelectorAll('.tmap').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var box = document.createElement('div');
+      box.className = 'zoombox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      var bar = document.createElement('div'); bar.className = 'zoombox-bar';
+      var cap = document.createElement('span'); cap.textContent = btn.dataset.cap + ' · 지도를 누르면 더 크게';
+      var x = document.createElement('button'); x.type = 'button'; x.textContent = '닫기';
+      bar.appendChild(cap); bar.appendChild(x);
+      var sc = document.createElement('div'); sc.className = 'zoombox-scroll';
+      var im = document.createElement('img'); im.src = btn.dataset.zoom; im.alt = btn.dataset.cap;
+      sc.appendChild(im); box.appendChild(bar); box.appendChild(sc);
+      var close = function () {
+        box.remove(); document.removeEventListener('keydown', onKey);
+        document.documentElement.style.overflow = ''; btn.focus();
+      };
+      var onKey = function (ev) { if (ev.key === 'Escape') close(); };
+      im.addEventListener('click', function (ev) { ev.stopPropagation(); box.classList.toggle('big'); });
+      bar.addEventListener('click', function (ev) { ev.stopPropagation(); });
+      x.addEventListener('click', close);
+      box.addEventListener('click', close);
+      document.addEventListener('keydown', onKey);
+      document.documentElement.style.overflow = 'hidden';
+      document.body.appendChild(box); x.focus();
+    });
+  });
+})();
+
+(function () {
   // 개별 산 페이지 미니맵: 그 산이 속한 시도를 강조한다
   document.querySelectorAll('.kmap.zoom').forEach(function (svg) {
     var r = svg.dataset.region;

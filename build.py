@@ -1031,6 +1031,22 @@ def log_html(logs, mt_name=''):
     return ''.join(out)
 
 
+def side_map(m, kmap):
+    """옆칸 지도. 본문에 trailmap 이 있으면 등산지도를 싣고, 누르면 크게 보인다.
+    없으면 위치만 찍은 미니맵을 쓴다."""
+    tm = (m.get('content') or {}).get('trailmap')
+    if tm:
+        src = '../' + img('assets/photos/' + tm['file'])
+        cap = tm.get('caption') or f'{m["name"]} 등산지도'
+        return (f'<div class="minimap"><button type="button" class="minimap-frame tmap" '
+                f'data-zoom="{e(src)}" data-cap="{e(cap)}" aria-label="{e(cap)} 크게 보기">'
+                f'<img src="{e(src)}" alt="{e(cap)}" loading="lazy" decoding="async">'
+                f'<span class="tmap-hint">눌러서 크게 보기</span></button>'
+                f'<p class="cap">{e(cap)}</p></div>')
+    return (f'<div class="minimap"><div class="minimap-frame">{minimap(m, kmap)}</div>'
+            f'<p class="cap">북위 {m["lat"]:.3f}° / 동경 {m["lon"]:.3f}° (정상부 근사 좌표)</p></div>')
+
+
 def build_mountain(m, prev, nxt, kmap, photos):
     c = m['content']
     ph = photos.get(m['slug'])
@@ -1115,10 +1131,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
   <div class="post-body">
     <div class="main">{main}</div>
     <aside class="side">
-      <div class="minimap">
-        <div class="minimap-frame">{minimap(m, kmap)}</div>
-        <p class="cap">북위 {m['lat']:.3f}° / 동경 {m['lon']:.3f}° (정상부 근사 좌표)</p>
-      </div>
+      {side_map(m, kmap)}
       <div class="fact">
         <dl>
           <dt>높이</dt><dd>{e(m['height'])}</dd>
@@ -1564,6 +1577,17 @@ dl.access dd{margin:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}
 .minimap-frame .kmap{height:auto}
+.tmap{display:block;width:100%;padding:0;background:#fff;cursor:zoom-in;font:inherit}
+.tmap img{display:block;width:100%;height:auto}
+.tmap-hint{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.62);color:#fff;font-size:11.5px;padding:4px 9px;border-radius:999px}
+.tmap:hover .tmap-hint,.tmap:focus-visible .tmap-hint{background:var(--green)}
+.zoombox{position:fixed;inset:0;z-index:1000;background:rgba(10,14,18,.92);display:flex;flex-direction:column;cursor:zoom-out}
+.zoombox-scroll{flex:1;overflow:auto;display:flex;-webkit-overflow-scrolling:touch}
+.zoombox img{margin:auto;max-width:100%;max-height:100%;display:block}
+.zoombox.big img{max-width:none;max-height:none;cursor:zoom-out}
+.zoombox:not(.big) img{cursor:zoom-in}
+.zoombox-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;color:#fff;font-size:13px;cursor:default}
+.zoombox-bar button{background:#fff;color:#111;border:0;border-radius:999px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer}
 .cap{font-size:12px;color:var(--sub);margin:7px 2px 0}
 .fact{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
 .fact dl{margin:0;display:grid;grid-template-columns:44px 1fr;gap:9px 12px;font-size:13.5px}
@@ -1616,6 +1640,37 @@ footer.site .muted{margin:0 auto;text-align:center}
 """
 
 JS = r"""
+(function () {
+  // 등산지도: 누르면 화면 가득 띄우고, 한 번 더 누르면 원본 크기로 키워 끌어서 본다
+  document.querySelectorAll('.tmap').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var box = document.createElement('div');
+      box.className = 'zoombox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      var bar = document.createElement('div'); bar.className = 'zoombox-bar';
+      var cap = document.createElement('span'); cap.textContent = btn.dataset.cap + ' · 지도를 누르면 더 크게';
+      var x = document.createElement('button'); x.type = 'button'; x.textContent = '닫기';
+      bar.appendChild(cap); bar.appendChild(x);
+      var sc = document.createElement('div'); sc.className = 'zoombox-scroll';
+      var im = document.createElement('img'); im.src = btn.dataset.zoom; im.alt = btn.dataset.cap;
+      sc.appendChild(im); box.appendChild(bar); box.appendChild(sc);
+      var close = function () {
+        box.remove(); document.removeEventListener('keydown', onKey);
+        document.documentElement.style.overflow = ''; btn.focus();
+      };
+      var onKey = function (ev) { if (ev.key === 'Escape') close(); };
+      im.addEventListener('click', function (ev) { ev.stopPropagation(); box.classList.toggle('big'); });
+      bar.addEventListener('click', function (ev) { ev.stopPropagation(); });
+      x.addEventListener('click', close);
+      box.addEventListener('click', close);
+      document.addEventListener('keydown', onKey);
+      document.documentElement.style.overflow = 'hidden';
+      document.body.appendChild(box); x.focus();
+    });
+  });
+})();
+
 (function () {
   // 개별 산 페이지 미니맵: 그 산이 속한 시도를 강조한다
   document.querySelectorAll('.kmap.zoom').forEach(function (svg) {
