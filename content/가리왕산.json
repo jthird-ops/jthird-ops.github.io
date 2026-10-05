@@ -154,6 +154,10 @@
           "33'46\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/gariwangsan-2026-10-04.html",
+        "label": "3D 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "가리왕산자연휴양림에서 출발",

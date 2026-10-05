@@ -35,6 +35,7 @@ python build.py
 | `tools/optimize_photos.py` | 사진 리사이즈·재인코딩 |
 | `tools/add_my_photo.py` | 직접 찍은 사진(HEIC 포함) 넣기 |
 | `tools/contact_sheet.py` | 사진 폴더 → 번호 붙인 컨택트 시트 |
+| `tools/make_3d.py` | GPX → 3D 등산코스 페이지 (`assets/3d/`). 틀은 `tools/3d_template.html` |
 
 ## 본문 스키마 (`content/*.json`)
 
