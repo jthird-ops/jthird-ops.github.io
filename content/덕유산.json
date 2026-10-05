@@ -167,6 +167,10 @@
           "29'51\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/deogyusan-2025-08-16.html",
+        "label": "3D 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "구천동탐방지원센터에서 출발",
