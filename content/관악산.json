@@ -154,6 +154,10 @@
      "28'56\"/km"
     ]
    ],
+   "fly": {
+    "file": "3d/gwanaksan-2025-10-11.html",
+    "label": "3D 코스 따라가 보기"
+   },
    "sections": [
     {
      "heading": "흐린 날, 지하철로 관악산역까지",
