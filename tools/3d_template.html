@@ -29,6 +29,7 @@ canvas#prof{display:block;width:100%;height:64px;cursor:pointer;touch-action:non
 .ctl button#play{background:#ff5a3c;border-color:#ff5a3c;min-width:92px}
 .ctl .sp{margin-left:auto;display:flex;gap:6px}
 .lbl{background:#111c;color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid #fff6;white-space:nowrap}
+.lbl.way{background:#ff5a3cdd;border-color:#fff9;font-size:11.5px;padding:3px 8px}
 .me{width:18px;height:18px;border-radius:50%;background:#ff5a3c;border:3px solid #fff;box-shadow:0 0 0 6px #ff5a3c44,0 2px 6px #0008}
 #close{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:4;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#000a;border:1px solid #fff6;color:#fff;font-size:20px;font-weight:700;line-height:1;text-decoration:none;backdrop-filter:blur(6px)}
 #close:hover{background:#ff5a3c;border-color:#ff5a3c}
@@ -133,10 +134,11 @@ const line = d => ({ type: 'Feature', geometry: { type: 'LineString',
   coordinates: (() => { const p = at(d), c = coords.slice(0, p.i+1); c.push([p.lon, p.lat]); return c.length > 1 ? c : [c[0], c[0]]; })() } });
 
 const me = new maplibregl.Marker({ element: Object.assign(document.createElement('div'), {className: 'me'}) });
-function label(i, text) {
-  const el = Object.assign(document.createElement('div'), {className: 'lbl', textContent: text});
-  new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -10] }).setLngLat(coords[i]).addTo(map);
+function label(i, text, cls) {
+  const el = Object.assign(document.createElement('div'), {className: 'lbl' + (cls ? ' ' + cls : ''), textContent: text});
+  new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -10] }).setLngLat(Array.isArray(i) ? i : coords[i]).addTo(map);
 }
+const MARKS = __MARKS__;        // 코스 위 지점: [lon, lat, 이름]
 
 map.on('load', () => {
   // 창이 가려진 채 열리면 크기를 못 재므로, 뜨는 순간 다시 맞춘다
@@ -153,6 +155,7 @@ map.on('load', () => {
   label(0, loop ? '출발 · 도착' : '출발');
   label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));
   if (!loop) label(coords.length-1, '도착');
+  MARKS.forEach(m => label([m[0], m[1]], m[2], 'way'));
   me.setLngLat(coords[0]).addTo(map);
   render();
   addPlaceNames();

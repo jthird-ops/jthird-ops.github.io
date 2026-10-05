@@ -5,7 +5,7 @@
 
     python tools/make_3d.py <GPX> --slug 가리왕산 --out gariwangsan-2026-10-04 \
         --name 가리왕산 --sub "휴양림 → 정상 → 중봉 → 휴양림 · 16.1km" --km 16.1 \
-        [--peak "가리왕산 정상 1,561m"] [--duration 120]
+        [--peak "가리왕산 정상 1,561m"] [--mark "12:20=마항치" ...] [--duration 120]
 
 페이지마다 설정과 경로를 data/3d/<이름>.json 에 남긴다. 틀을 고친 뒤에는
     python tools/make_3d.py --all
@@ -37,6 +37,24 @@ def bgm_ver():
         return '0'
 
 
+def marks(cfg):
+    """'12:20=마항치' 같은 지점 표시를 경로 위 좌표로 바꾼다. 그 시각에 있던 자리."""
+    out = []
+    tr = cfg['track']
+    for mk in cfg.get('marks', []):
+        hhmm, _, text = mk.partition('=')
+        h, mi = hhmm.split(':')
+        t = (int(h) * 3600 + int(mi) * 60 - cfg['clock']) % 86400
+        if t > tr[-1][3] + 600:
+            raise SystemExit(f'{mk}: 산행 시간 밖입니다')
+        j = next((k for k, p in enumerate(tr) if p[3] >= t), len(tr) - 1)
+        a, b = tr[max(0, j - 1)], tr[j]
+        f = (t - a[3]) / (b[3] - a[3]) if b[3] > a[3] else 0
+        f = min(1, max(0, f))
+        out.append([round(a[0] + (b[0] - a[0]) * f, 6), round(a[1] + (b[1] - a[1]) * f, 6), text.strip()])
+    return out
+
+
 def write(cfg):
     tpl = open(os.path.join(ROOT, 'tools', '3d_template.html'), encoding='utf-8').read()
     out = (tpl.replace('/*TRACK*/', json.dumps(cfg['track'], separators=(',', ':')))
@@ -45,6 +63,7 @@ def write(cfg):
               .replace('__KM__', repr(cfg['km'])).replace('__CLOCK__', str(cfg['clock']))
               .replace('__DURATION__', str(cfg['duration']))
               .replace('__PEAK__', json.dumps(cfg['peak'], ensure_ascii=False))
+              .replace('__MARKS__', json.dumps(marks(cfg), ensure_ascii=False, separators=(',', ':')))
               .replace('__BGM__', bgm_ver()))
     dest = os.path.join(ROOT, 'assets', '3d', cfg['out'] + '.html')
     open(dest, 'w', encoding='utf-8').write(out)
@@ -66,6 +85,7 @@ def main():
     ap.add_argument('--sub', required=True, help='제목 아래 한 줄 (코스 요약)')
     ap.add_argument('--km', type=float, required=True, help='앱이 기록한 총 거리')
     ap.add_argument('--peak', default='', help='최고 지점 라벨. 비우면 GPS 고도로 표기')
+    ap.add_argument('--mark', action='append', default=[], help="코스 지점 '시:분=이름' (여러 번 가능)")
     ap.add_argument('--duration', type=int, default=0, help="'보통' 속도 전체 재생 초")
     a = ap.parse_args()
 
@@ -86,7 +106,7 @@ def main():
     keep.append(pts[-1])
     t0 = keep[0][3]
     cfg = {'out': a.out, 'slug': a.slug, 'name': a.name, 'sub': a.sub, 'km': a.km, 'peak': a.peak,
-           'duration': a.duration or max(75, round(a.km * 8)), 'date': pts[0][4], 'clock': t0,
+           'duration': a.duration or max(75, round(a.km * 8)), 'marks': a.mark, 'date': pts[0][4], 'clock': t0,
            'track': [[round(p[0], 6), round(p[1], 6), round(p[2], 1), (p[3] - t0) % 86400] for p in keep]}
     os.makedirs(store, exist_ok=True)
     json.dump(cfg, open(os.path.join(store, a.out + '.json'), 'w', encoding='utf-8'),
