@@ -156,6 +156,10 @@
           "33'11\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/dobongsan-2025-06-05.html",
+        "label": "3D 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "갑자기 산이 생각나서",
