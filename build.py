@@ -1024,7 +1024,7 @@ def log_html(logs, mt_name=''):
             verdict = f'<div class="lg-verdict">{stars}<p>{e(lg.get("verdict", ""))}</p></div>'
         out.append(
             f'<article class="lg"><header class="lg-head">'
-            + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
+            + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}" target="_blank"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
                f'{e(lg["fly"].get("label") or "3D 코스 따라가 보기")}</a>' if lg.get('fly') else '')
             + f'<b class="lg-title">{e(lg.get("title", ""))}</b>'
             + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')

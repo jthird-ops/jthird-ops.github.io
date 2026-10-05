@@ -42,8 +42,7 @@ canvas#prof{display:block;width:100%;height:64px;cursor:pointer;touch-action:non
 <div id="map"></div>
 <a id="close" href="../../mountain/마니산-강화도.html" aria-label="3D 코스 닫기" title="닫기">✕</a>
 <div class="top">
-  <a class="back" href="../../mountain/마니산-강화도.html">← 마니산 글로 돌아가기</a>
-  <h1>마니산 3D 등산코스</h1>
+    <h1>마니산 3D 등산코스</h1>
   <p>2025.11.16 · 동쪽 들머리 → 능선 → 정상 → 화도면 · 6.48km</p>
 </div>
 <div class="panel"><div class="inner">
@@ -156,11 +155,13 @@ map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-
 ['dragstart', 'wheel', 'touchstart'].forEach(ev => map.on(ev, e => { if (e.originalEvent) follow = false; }));
 
 const $ = id => document.getElementById(id);
-// 닫기: 블로그 글에서 넘어왔으면 그 자리로 되돌아가고, 아니면 마니산 글로 간다
+// 닫기: 새 창(탭)으로 열린 이 페이지를 닫는다. 브라우저가 닫기를 막으면
+// (주소로 바로 들어온 경우 등) 마니산 글로 이동한다.
 $('close').onclick = ev => {
-  let same = false;
-  try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
-  if (same && history.length > 1) { ev.preventDefault(); history.back(); }
+  ev.preventDefault();
+  const href = $('close').href;
+  window.close();
+  setTimeout(() => { if (!window.closed) location.href = href; }, 400);
 };
 const fmt = s => { s = Math.round(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return h + ':' + String(m).padStart(2, '0'); };
 function render() {
