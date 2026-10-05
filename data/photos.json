@@ -514,12 +514,13 @@
  },
  "백운산-동강": {
   "file": "백운산-동강.jpg",
-  "title": "칠족령",
-  "author": "한국관광공사 박은경",
-  "license": "공공누리 제1유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#01",
-  "source": "https://api.visitkorea.or.kr/",
-  "provider": "한국관광공사 포토코리아"
+  "title": "하산길에 내려다본 동강",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-10-03"
  },
  "불갑산-영광": {
   "file": "불갑산-영광.jpg",
