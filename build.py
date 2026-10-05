@@ -984,6 +984,15 @@ def food_html(food, mt_name=''):
     return ''.join(out)
 
 
+def fly_ver(rel):
+    """3D 코스 페이지의 내용 해시. 주소 뒤에 붙여, 페이지를 고치면 방문자
+    브라우저가 예전에 받아 둔 것 대신 새 것을 받게 한다."""
+    try:
+        return hashlib.md5(open(os.path.join(ROOT, 'assets', rel), 'rb').read()).hexdigest()[:8]
+    except OSError:
+        return '0'
+
+
 def log_html(logs, mt_name=''):
     """직접 다녀온 등반기록. 최근 산행이 위로 온다.
 
@@ -1024,7 +1033,7 @@ def log_html(logs, mt_name=''):
             verdict = f'<div class="lg-verdict">{stars}<p>{e(lg.get("verdict", ""))}</p></div>'
         out.append(
             f'<article class="lg"><header class="lg-head">'
-            + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}" target="_blank"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
+            + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}?v={fly_ver(lg["fly"]["file"])}" target="_blank"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
                f'{e(lg["fly"].get("label") or "3D 코스 따라가 보기")}</a>' if lg.get('fly') else '')
             + f'<b class="lg-title">{e(lg.get("title", ""))}</b>'
             + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')
