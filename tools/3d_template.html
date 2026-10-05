@@ -116,9 +116,7 @@ try {
           attribution: '위성사진 © Esri, Maxar, Earthstar Geographics' },
         dem: { type: 'raster-dem', tileSize: 256, maxzoom: 14, encoding: 'terrarium',
           tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-          attribution: '지형 © Mapzen / AWS Terrain Tiles' },
-        osm: { type: 'vector', url: 'https://tiles.openfreemap.org/planet',
-          attribution: '지명 © OpenStreetMap 기여자 · OpenFreeMap' }
+          attribution: '지형 © Mapzen / AWS Terrain Tiles' }
       },
       layers: [
         { id: 'bg', type: 'background', paint: {'background-color': '#1c2a22'} },
@@ -152,17 +150,23 @@ map.on('load', () => {
   map.addLayer({ id: 'done', type: 'line', source: 'done', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#ff5a3c', 'line-width': 5.5} });
   const PEAK_LABEL = __PEAK__;
   const loop = cum.length > 1 && R*Math.hypot(rad(T[0][0]-T[T.length-1][0])*Math.cos(rad(T[0][1])), rad(T[0][1]-T[T.length-1][1])) < 200;
-  addPlaceNames();
   label(0, loop ? '출발 · 도착' : '출발');
   label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));
   if (!loop) label(coords.length-1, '도착');
   me.setLngLat(coords[0]).addTo(map);
   render();
+  addPlaceNames();
   requestAnimationFrame(tick);
 });
 // 지도에 등록된 지명(봉우리·마을·시설·물길)을 오픈스트리트맵에서 받아 글자로 얹는다.
 // 받아오지 못해도 지도와 경로는 그대로 보인다.
 function addPlaceNames() {
+  // 지명 자료는 지도가 다 뜬 뒤에 붙인다. 처음부터 넣으면 그 서버가 느리거나
+  // 막혔을 때 지도 전체가 뜨지 않는다.
+  try {
+    map.addSource('osm', { type: 'vector', url: 'https://tiles.openfreemap.org/planet',
+      attribution: '지명 © OpenStreetMap 기여자 · OpenFreeMap' });
+  } catch (e) { console.warn('지명', e); return; }
   const name = ['coalesce', ['get', 'name:ko'], ['get', 'name']];
   const base = (size, color) => ({
     layout: { 'text-field': name, 'text-font': ['Noto Sans Regular'], 'text-size': size,
