@@ -156,6 +156,10 @@
      "30'50\"/km"
     ]
    ],
+   "fly": {
+    "file": "3d/gyeryongsan-2026-08-22.html",
+    "label": "3D 코스 따라가 보기"
+   },
    "sections": [
     {
      "heading": "동학사 탐방안내소에서 출발",
