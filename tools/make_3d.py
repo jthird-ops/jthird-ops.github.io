@@ -7,6 +7,10 @@
         --name 가리왕산 --sub "휴양림 → 정상 → 중봉 → 휴양림 · 16.1km" --km 16.1 \
         [--peak "가리왕산 정상 1,561m"] [--duration 120]
 
+페이지마다 설정과 경로를 data/3d/<이름>.json 에 남긴다. 틀을 고친 뒤에는
+    python tools/make_3d.py --all
+로 GPX 없이 전부 다시 만든다.
+
 만든 뒤 content/<슬러그>.json 의 해당 등반기록에
     "fly": {"file": "3d/<이름>.html", "label": "3D 코스 따라가 보기"}
 를 넣고 build.py 를 돌리면 기록 카드 오른쪽 위에 버튼이 생긴다.
@@ -14,7 +18,7 @@
 Pacer 가 내보낸 GPX 는 시각 끝에 Z 가 붙어 있지만 실제로는 현지 시각이라
 그대로 쓴다.
 """
-import argparse, hashlib, json, math, os, re
+import argparse, hashlib, json, math, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,7 +37,27 @@ def bgm_ver():
         return '0'
 
 
+def write(cfg):
+    tpl = open(os.path.join(ROOT, 'tools', '3d_template.html'), encoding='utf-8').read()
+    out = (tpl.replace('/*TRACK*/', json.dumps(cfg['track'], separators=(',', ':')))
+              .replace('__NAME__', cfg['name']).replace('__DATE__', cfg['date'])
+              .replace('__SLUG__', cfg['slug']).replace('__SUB__', cfg['sub'])
+              .replace('__KM__', repr(cfg['km'])).replace('__CLOCK__', str(cfg['clock']))
+              .replace('__DURATION__', str(cfg['duration']))
+              .replace('__PEAK__', json.dumps(cfg['peak'], ensure_ascii=False))
+              .replace('__BGM__', bgm_ver()))
+    dest = os.path.join(ROOT, 'assets', '3d', cfg['out'] + '.html')
+    open(dest, 'w', encoding='utf-8').write(out)
+    print(f"{dest}  (점 {len(cfg['track'])}개, {cfg['date']})")
+
+
 def main():
+    store = os.path.join(ROOT, 'data', '3d')
+    if '--all' in sys.argv:
+        for fn in sorted(os.listdir(store)):
+            if fn.endswith('.json'):
+                write(json.load(open(os.path.join(store, fn), encoding='utf-8')))
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument('gpx')
     ap.add_argument('--slug', required=True, help='산 글의 슬러그 (닫기 버튼이 돌아갈 곳)')
@@ -61,19 +85,13 @@ def main():
             keep.append(p)
     keep.append(pts[-1])
     t0 = keep[0][3]
-    track = [[round(p[0], 6), round(p[1], 6), round(p[2], 1), (p[3] - t0) % 86400] for p in keep]
-
-    tpl = open(os.path.join(ROOT, 'tools', '3d_template.html'), encoding='utf-8').read()
-    out = (tpl.replace('/*TRACK*/', json.dumps(track, separators=(',', ':')))
-              .replace('__NAME__', a.name).replace('__DATE__', pts[0][4])
-              .replace('__SLUG__', a.slug).replace('__SUB__', a.sub)
-              .replace('__KM__', repr(a.km)).replace('__CLOCK__', str(t0))
-              .replace('__DURATION__', str(a.duration or max(75, round(a.km * 8))))
-              .replace('__PEAK__', json.dumps(a.peak, ensure_ascii=False))
-              .replace('__BGM__', bgm_ver()))
-    dest = os.path.join(ROOT, 'assets', '3d', a.out + '.html')
-    open(dest, 'w', encoding='utf-8').write(out)
-    print(f'{dest}  (점 {len(track)}개, {pts[0][4]})')
+    cfg = {'out': a.out, 'slug': a.slug, 'name': a.name, 'sub': a.sub, 'km': a.km, 'peak': a.peak,
+           'duration': a.duration or max(75, round(a.km * 8)), 'date': pts[0][4], 'clock': t0,
+           'track': [[round(p[0], 6), round(p[1], 6), round(p[2], 1), (p[3] - t0) % 86400] for p in keep]}
+    os.makedirs(store, exist_ok=True)
+    json.dump(cfg, open(os.path.join(store, a.out + '.json'), 'w', encoding='utf-8'),
+              ensure_ascii=False, separators=(',', ':'))
+    write(cfg)
 
 
 if __name__ == '__main__':
