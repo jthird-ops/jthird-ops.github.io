@@ -141,6 +141,10 @@
      "30'14\"/km"
     ]
    ],
+   "fly": {
+    "file": "3d/garisan-2026-09-05.html",
+    "label": "3D 코스 따라가 보기"
+   },
    "sections": [
     {
      "heading": "가리산자연휴양림에서 출발",
