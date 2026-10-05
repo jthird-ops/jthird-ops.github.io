@@ -84,7 +84,7 @@ def main():
     ap.add_argument('--name', required=True, help='제목에 쓸 산 이름')
     ap.add_argument('--sub', required=True, help='제목 아래 한 줄 (코스 요약)')
     ap.add_argument('--km', type=float, required=True, help='앱이 기록한 총 거리')
-    ap.add_argument('--peak', default='', help='최고 지점 라벨. 비우면 GPS 고도로 표기')
+    ap.add_argument('--peak', default='', help="최고 지점 라벨. 비우면 GPS 고도로 표기, '-' 면 표기 안 함(지도 지명과 겹칠 때)")
     ap.add_argument('--mark', action='append', default=[], help="코스 지점 '시:분=이름' (여러 번 가능)")
     ap.add_argument('--duration', type=int, default=0, help="'보통' 속도 전체 재생 초")
     a = ap.parse_args()

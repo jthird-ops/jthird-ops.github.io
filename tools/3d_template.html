@@ -153,7 +153,7 @@ map.on('load', () => {
   const PEAK_LABEL = __PEAK__;
   const loop = cum.length > 1 && R*Math.hypot(rad(T[0][0]-T[T.length-1][0])*Math.cos(rad(T[0][1])), rad(T[0][1]-T[T.length-1][1])) < 200;
   label(0, loop ? '출발 · 도착' : '출발');
-  label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));
+  if (PEAK_LABEL !== '-') label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));   // '-' 는 지도 지명에 맡긴다
   if (!loop) label(coords.length-1, '도착');
   MARKS.forEach(m => label([m[0], m[1]], m[2], 'way'));
   me.setLngLat(coords[0]).addTo(map);

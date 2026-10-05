@@ -138,7 +138,7 @@ function label(i, text, cls) {
   const el = Object.assign(document.createElement('div'), {className: 'lbl' + (cls ? ' ' + cls : ''), textContent: text});
   new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -10] }).setLngLat(Array.isArray(i) ? i : coords[i]).addTo(map);
 }
-const MARKS = [[128.564475,37.425876,"등산로 입구"],[128.556883,37.457443,"마항치"],[128.580746,37.451644,"중봉"]];        // 코스 위 지점: [lon, lat, 이름]
+const MARKS = [[128.564475,37.425876,"등산로 입구"]];        // 코스 위 지점: [lon, lat, 이름]
 
 map.on('load', () => {
   // 창이 가려진 채 열리면 크기를 못 재므로, 뜨는 순간 다시 맞춘다
@@ -150,10 +150,10 @@ map.on('load', () => {
   map.addLayer({ id: 'all-c', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#000', 'line-opacity': .35, 'line-width': 7} });
   map.addLayer({ id: 'all', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#fff', 'line-opacity': .85, 'line-width': 3.5} });
   map.addLayer({ id: 'done', type: 'line', source: 'done', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#ff5a3c', 'line-width': 5.5} });
-  const PEAK_LABEL = "가리왕산 정상 1,561m";
+  const PEAK_LABEL = "-";
   const loop = cum.length > 1 && R*Math.hypot(rad(T[0][0]-T[T.length-1][0])*Math.cos(rad(T[0][1])), rad(T[0][1]-T[T.length-1][1])) < 200;
   label(0, loop ? '출발 · 도착' : '출발');
-  label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));
+  if (PEAK_LABEL !== '-') label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));   // '-' 는 지도 지명에 맡긴다
   if (!loop) label(coords.length-1, '도착');
   MARKS.forEach(m => label([m[0], m[1]], m[2], 'way'));
   me.setLngLat(coords[0]).addTo(map);
