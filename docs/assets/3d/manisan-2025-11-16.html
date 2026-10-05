@@ -22,20 +22,25 @@ html,body{margin:0;height:100%;background:#0d1512;color:#fff;font-family:-apple-
 .stats span{font-size:11px;opacity:.75}
 canvas#prof{display:block;width:100%;height:64px;cursor:pointer;touch-action:none}
 .ctl{display:flex;align-items:center;gap:8px;margin-top:8px}
-.ctl button{appearance:none;border:1px solid #fff5;background:#fff2;color:#fff;font:inherit;font-size:13px;font-weight:700;border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(6px)}
+.ctl button{appearance:none;border:1px solid #fff5;background:#fff2;color:#fff;font:inherit;font-size:13px;font-weight:700;border-radius:999px;padding:8px 14px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(6px)}
 .ctl button.on{background:#fff;color:#123}
 .ctl button#play{background:#ff5a3c;border-color:#ff5a3c;min-width:92px}
 .ctl .sp{margin-left:auto;display:flex;gap:6px}
 .lbl{background:#111c;color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid #fff6;white-space:nowrap}
 .me{width:18px;height:18px;border-radius:50%;background:#ff5a3c;border:3px solid #fff;box-shadow:0 0 0 6px #ff5a3c44,0 2px 6px #0008}
+#close{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:4;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#000a;border:1px solid #fff6;color:#fff;font-size:20px;font-weight:700;line-height:1;text-decoration:none;backdrop-filter:blur(6px)}
+#close:hover{background:#ff5a3c;border-color:#ff5a3c}
+.maplibregl-ctrl-top-right{top:58px}
+.top{padding-right:64px}
 .maplibregl-ctrl-attrib{font-size:10px}
 .maplibregl-ctrl-bottom-right{bottom:190px}
 #msg{position:absolute;inset:0;display:none;place-items:center;z-index:3;padding:24px;text-align:center;background:#0d1512}
-@media(max-width:520px){.stats b{font-size:16px}.top h1{font-size:16px}.ctl button{padding:8px 11px}}
+@media(max-width:520px){.stats b{font-size:16px}.top h1{font-size:16px}.ctl{gap:5px}.ctl .sp{gap:4px}.ctl button{padding:8px 9px;font-size:12px}.ctl button#play{min-width:70px}}
 </style>
 </head>
 <body>
 <div id="map"></div>
+<a id="close" href="../../mountain/마니산-강화도.html" aria-label="3D 코스 닫기" title="닫기">✕</a>
 <div class="top">
   <a class="back" href="../../mountain/마니산-강화도.html">← 마니산 글로 돌아가기</a>
   <h1>마니산 3D 등산코스</h1>
@@ -54,8 +59,8 @@ canvas#prof{display:block;width:100%;height:64px;cursor:pointer;touch-action:non
     <button id="over" type="button">전체 보기</button>
     <div class="sp">
       <button type="button" data-sp="0.5">느리게</button>
-      <button type="button" data-sp="1" class="on">보통</button>
-      <button type="button" data-sp="2">빠르게</button>
+      <button type="button" data-sp="1">보통</button>
+      <button type="button" data-sp="2" class="on">빠르게</button>
     </div>
   </div>
 </div></div>
@@ -119,7 +124,7 @@ try {
 window.map = map;
 
 const PAD = {top: 40, bottom: 170, left: 0, right: 0};
-let dist = 0, playing = false, speed = 1, follow = false, last = 0, brg = null;
+let dist = 0, playing = false, speed = 2, follow = false, last = 0, brg = null;
 const line = d => ({ type: 'Feature', geometry: { type: 'LineString',
   coordinates: (() => { const p = at(d), c = coords.slice(0, p.i+1); c.push([p.lon, p.lat]); return c.length > 1 ? c : [c[0], c[0]]; })() } });
 
@@ -151,6 +156,12 @@ map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-
 ['dragstart', 'wheel', 'touchstart'].forEach(ev => map.on(ev, e => { if (e.originalEvent) follow = false; }));
 
 const $ = id => document.getElementById(id);
+// 닫기: 블로그 글에서 넘어왔으면 그 자리로 되돌아가고, 아니면 마니산 글로 간다
+$('close').onclick = ev => {
+  let same = false;
+  try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
+  if (same && history.length > 1) { ev.preventDefault(); history.back(); }
+};
 const fmt = s => { s = Math.round(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return h + ':' + String(m).padStart(2, '0'); };
 function render() {
   const p = at(dist);
