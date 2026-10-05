@@ -181,8 +181,32 @@ function render() {
     if (brg === null) brg = want;
     let d = ((want - brg + 540) % 360) - 180;
     brg += d * 0.035;
-    map.jumpTo({ center: [p.lon, p.lat], bearing: brg, pitch: 66, zoom: 15.4, padding: PAD });
+    const want2 = clearPitch(p, brg);
+    pit += (want2 - pit) * (want2 < pit ? 0.14 : 0.03);   // 가려지면 빨리 올라가고, 풀리면 천천히 내려온다
+    map.jumpTo({ center: [p.lon, p.lat], bearing: brg, pitch: pit, zoom: ZOOM, padding: PAD });
   }
+}
+// 카메라와 현재 위치 사이를 산이 가리는지 본다. 가리면 더 위에서 내려다보도록
+// 기울기를 줄인다. 가파르고 높은 산에서 카메라가 능선 뒤로 숨는 것을 막는다.
+const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24;
+let pit = PITCH_MAX;
+function shift(p, deg, m) {
+  return [p.lon + m*Math.sin(rad(deg)) / (111320*Math.cos(rad(p.lat))), p.lat + m*Math.cos(rad(deg)) / 111320];
+}
+function clearPitch(p, b) {
+  const H = map.getContainer().clientHeight || 600;
+  const D = 1.5 * H * 40075016.686 * Math.cos(rad(p.lat)) / (512 * Math.pow(2, ZOOM));   // 카메라까지 거리(m)
+  for (let pitch = PITCH_MAX; pitch > PITCH_MIN; pitch -= 3) {
+    const back = D*Math.sin(rad(pitch)), up = D*Math.cos(rad(pitch));
+    let ok = true;
+    for (let f = 0.12; f <= 1.001 && ok; f += 0.11) {
+      let g = null;
+      try { g = map.queryTerrainElevation(shift(p, b + 180, back*f)); } catch (e) {}
+      if (g != null && g + 40 + 90*f > up*f) ok = false;   // 시선이 땅보다 넉넉히 위에 있어야 한다
+    }
+    if (ok) return pitch;
+  }
+  return PITCH_MIN;
 }
 function tick(now) {
   const dt = Math.min(0.25, (now - (last || now)) / 1000); last = now;
@@ -205,7 +229,8 @@ $('play').onclick = () => {
   if (playing) return setPlay(false);
   if (dist >= LEN) dist = 0;
   const p = at(dist); brg = bearing(at(dist), at(dist+220));
-  map.flyTo({ center: [p.lon, p.lat], bearing: brg, pitch: 66, zoom: 15.4, padding: PAD, duration: 1800 });
+  pit = clearPitch(p, brg);
+  map.flyTo({ center: [p.lon, p.lat], bearing: brg, pitch: pit, zoom: ZOOM, padding: PAD, duration: 1800 });
   map.once('moveend', () => { follow = true; setPlay(true); });
 };
 $('over').onclick = () => { setPlay(false); overview(); };
