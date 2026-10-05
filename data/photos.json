@@ -121,11 +121,13 @@
  },
  "가리왕산": {
   "file": "가리왕산.jpg",
-  "title": "Jeongseon Alpine Center.jpg",
-  "author": "Dittwjfsdgkvkdjg",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3AJeongseon_Alpine_Center.jpg"
+  "title": "가리왕산 정상 부근에서 바라본 풍경",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-10-04"
  },
  "계룡산": {
   "file": "계룡산.jpg",
