@@ -29,6 +29,7 @@ canvas#prof{display:block;width:100%;height:64px;cursor:pointer;touch-action:non
 .ctl button#play{background:#ff5a3c;border-color:#ff5a3c;min-width:92px}
 .ctl .sp{margin-left:auto;display:flex;gap:6px}
 .lbl{background:#111c;color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid #fff6;white-space:nowrap}
+.lbl.way{background:#ff5a3cdd;border-color:#fff9;font-size:11.5px;padding:3px 8px}
 .me{width:18px;height:18px;border-radius:50%;background:#ff5a3c;border:3px solid #fff;box-shadow:0 0 0 6px #ff5a3c44,0 2px 6px #0008}
 #close{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:4;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#000a;border:1px solid #fff6;color:#fff;font-size:20px;font-weight:700;line-height:1;text-decoration:none;backdrop-filter:blur(6px)}
 #close:hover{background:#ff5a3c;border-color:#ff5a3c}
@@ -109,6 +110,7 @@ try {
   map = new maplibregl.Map({
     container: 'map', maxPitch: 80, attributionControl: {compact: true},
     style: { version: 8,
+      glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
       sources: {
         sat: { type: 'raster', tileSize: 256, maxzoom: 18,
           tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
@@ -132,10 +134,11 @@ const line = d => ({ type: 'Feature', geometry: { type: 'LineString',
   coordinates: (() => { const p = at(d), c = coords.slice(0, p.i+1); c.push([p.lon, p.lat]); return c.length > 1 ? c : [c[0], c[0]]; })() } });
 
 const me = new maplibregl.Marker({ element: Object.assign(document.createElement('div'), {className: 'me'}) });
-function label(i, text) {
-  const el = Object.assign(document.createElement('div'), {className: 'lbl', textContent: text});
-  new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -10] }).setLngLat(coords[i]).addTo(map);
+function label(i, text, cls) {
+  const el = Object.assign(document.createElement('div'), {className: 'lbl' + (cls ? ' ' + cls : ''), textContent: text});
+  new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -10] }).setLngLat(Array.isArray(i) ? i : coords[i]).addTo(map);
 }
+const MARKS = [];        // 코스 위 지점: [lon, lat, 이름]
 
 map.on('load', () => {
   // 창이 가려진 채 열리면 크기를 못 재므로, 뜨는 순간 다시 맞춘다
@@ -147,15 +150,46 @@ map.on('load', () => {
   map.addLayer({ id: 'all-c', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#000', 'line-opacity': .35, 'line-width': 7} });
   map.addLayer({ id: 'all', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#fff', 'line-opacity': .85, 'line-width': 3.5} });
   map.addLayer({ id: 'done', type: 'line', source: 'done', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#ff5a3c', 'line-width': 5.5} });
-  const PEAK_LABEL = "";
+  const PEAK_LABEL = "-";
   const loop = cum.length > 1 && R*Math.hypot(rad(T[0][0]-T[T.length-1][0])*Math.cos(rad(T[0][1])), rad(T[0][1]-T[T.length-1][1])) < 200;
   label(0, loop ? '출발 · 도착' : '출발');
-  label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));
+  if (PEAK_LABEL !== '-') label(peak, PEAK_LABEL || ('최고 지점 ' + Math.round(ELE[peak]) + 'm'));   // '-' 는 지도 지명에 맡긴다
   if (!loop) label(coords.length-1, '도착');
+  MARKS.forEach(m => label([m[0], m[1]], m[2], 'way'));
   me.setLngLat(coords[0]).addTo(map);
   render();
+  addPlaceNames();
   requestAnimationFrame(tick);
 });
+// 지도에 등록된 지명(봉우리·마을·시설·물길)을 오픈스트리트맵에서 받아 글자로 얹는다.
+// 받아오지 못해도 지도와 경로는 그대로 보인다.
+function addPlaceNames() {
+  // 지명 자료는 지도가 다 뜬 뒤에 붙인다. 처음부터 넣으면 그 서버가 느리거나
+  // 막혔을 때 지도 전체가 뜨지 않는다.
+  try {
+    map.addSource('osm', { type: 'vector', url: 'https://tiles.openfreemap.org/planet',
+      attribution: '지명 © OpenStreetMap 기여자 · OpenFreeMap' });
+  } catch (e) { console.warn('지명', e); return; }
+  const name = ['coalesce', ['get', 'name:ko'], ['get', 'name']];
+  const base = (size, color) => ({
+    layout: { 'text-field': name, 'text-font': ['Noto Sans Regular'], 'text-size': size,
+              'text-max-width': 8, 'text-padding': 6 },
+    paint: { 'text-color': color, 'text-halo-color': 'rgba(0,0,0,.82)', 'text-halo-width': 1.6 } });
+  const add = (id, layer, o, extra) => { try {
+    map.addLayer(Object.assign({ id, type: 'symbol', source: 'osm', 'source-layer': layer,
+      filter: ['any', ['has', 'name'], ['has', 'name:ko']] }, o, extra || {}));
+  } catch (e) { console.warn('지명', id, e); } };
+  add('nm-water', 'water_name', base(11, '#bfe3ff'));
+  add('nm-stream', 'waterway', base(11, '#bfe3ff'), { minzoom: 13 });
+  map.getLayer('nm-stream') && map.setLayoutProperty('nm-stream', 'symbol-placement', 'line');
+  add('nm-poi', 'poi', base(11, '#ffe9b0'), { minzoom: 13 });
+  add('nm-place', 'place', base(12.5, '#ffffff'));
+  const pk = base(13.5, '#ffffff');
+  pk.layout['text-field'] = ['case', ['has', 'ele'],
+    ['concat', name, '\n', ['to-string', ['get', 'ele']], 'm'], name];
+  pk.layout['symbol-sort-key'] = ['-', 0, ['to-number', ['get', 'ele'], 0]];   // 높은 봉우리 먼저
+  add('nm-peak', 'mountain_peak', pk);
+}
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
 // 손으로 지도를 움직이면 따라가기를 멈춘다
 ['dragstart', 'wheel', 'touchstart'].forEach(ev => map.on(ev, e => { if (e.originalEvent) follow = false; }));
