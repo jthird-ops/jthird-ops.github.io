@@ -1068,7 +1068,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
         rows = []
         for co in c.get('courses', []):
             rows.append(f"""<tr>
-        <td><b>{e(co['name'])}</b><br><span class="path">{e(co['path'])}</span></td>
+        <td><b>{e(co['name'])}</b>{' <span class="mine">🥾 나의 기록</span>' if co.get('mine') else ''}<br><span class="path">{e(co['path'])}</span></td>
         <td>{e(co.get('distance', '-'))}</td><td>{e(co.get('time', '-'))}</td>
         <td><span class="lv lv-{e(co.get('level', '중'))}">{e(co.get('level', '중'))}</span></td>
       </tr>""")
@@ -1530,6 +1530,7 @@ table.courses{width:100%;border-collapse:collapse;font-size:14px;min-width:460px
 table.courses th{text-align:left;font-size:12px;color:var(--sub);font-weight:650;
   padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.courses td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.courses .mine{display:inline-block;margin-left:4px;padding:2px 8px;border-radius:999px;background:var(--green);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;vertical-align:1px}
 table.courses .path{font-size:12.5px;color:var(--sub);line-height:1.5}
 .lv{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:650;white-space:nowrap}
 .lv-하{background:#e7f4ea;color:#1f7a4c}
