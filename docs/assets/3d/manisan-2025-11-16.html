@@ -130,6 +130,8 @@ function label(i, text) {
 }
 
 map.on('load', () => {
+  // 창이 가려진 채 열리면 크기를 못 재므로, 뜨는 순간 다시 맞춘다
+  map.resize(); map.fitBounds(bounds, { padding: {top: 90, bottom: 230, left: 40, right: 40}, pitch: 55, bearing: -20, duration: 0 });
   try { map.setTerrain({ source: 'dem', exaggeration: 1.35 }); } catch (e) { console.warn('terrain', e); }
   try { map.setSky && map.setSky({ 'sky-color': '#8ec5ee', 'horizon-color': '#dfeef7', 'fog-color': '#dfeef7', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.2 }); } catch (e) {}
   map.addSource('all', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: coords } } });
@@ -225,6 +227,8 @@ cv.addEventListener('pointerdown', e => { dragging = true; cv.setPointerCapture(
 cv.addEventListener('pointermove', e => { if (dragging) seek(e); });
 cv.addEventListener('pointerup', () => dragging = false);
 addEventListener('resize', drawProfile);
+if (window.ResizeObserver) new ResizeObserver(() => { map.resize(); drawProfile(); }).observe(document.getElementById('map'));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { map.resize(); drawProfile(); } });
 </script>
 </body>
 </html>

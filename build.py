@@ -1027,6 +1027,8 @@ def log_html(logs, mt_name=''):
             + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')
             + f'<div class="lg-chips">{chips}</div></header>'
             + (f'<div class="lg-stats">{stats}</div>' if stats else '')
+            + (f'<p class="lg-fly"><a href="../assets/{e(lg["fly"]["file"])}">'
+               f'{e(lg["fly"].get("label") or "3D로 코스 따라가 보기")} →</a></p>' if lg.get('fly') else '')
             + ''.join(body) + tips_html + verdict + '</article>')
     return ''.join(out)
 
@@ -1505,6 +1507,8 @@ section h2{font-size:24px;font-weight:750}
 .lg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .lg-chip{font-size:12.5px;background:var(--green-soft);color:var(--green);border-radius:999px;padding:3px 10px;font-weight:600}
 .lg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+.lg-fly{margin:12px 0 4px}
+.lg-fly a{display:inline-block;padding:10px 16px;border-radius:999px;background:#1f6f4a;color:#fff;font-weight:700;font-size:14px;text-decoration:none}
 .lg-stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
 .lg-stat b{display:block;font-size:16px;color:var(--green)}
 .lg-stat span{font-size:12px;color:var(--sub)}

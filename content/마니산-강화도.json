@@ -163,6 +163,10 @@
           "33'21\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/manisan-2025-11-16.html",
+        "label": "3D로 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "아침 햇살 속 정상",
