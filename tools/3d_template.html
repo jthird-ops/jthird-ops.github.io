@@ -136,7 +136,7 @@ function label(i, text) {
 map.on('load', () => {
   // 창이 가려진 채 열리면 크기를 못 재므로, 뜨는 순간 다시 맞춘다
   map.resize(); map.fitBounds(bounds, { padding: {top: 90, bottom: 230, left: 40, right: 40}, pitch: 55, bearing: -20, duration: 0 });
-  try { map.setTerrain({ source: 'dem', exaggeration: 1.35 }); } catch (e) { console.warn('terrain', e); }
+  try { map.setTerrain({ source: 'dem', exaggeration: EXAG }); } catch (e) { console.warn('terrain', e); }
   try { map.setSky && map.setSky({ 'sky-color': '#8ec5ee', 'horizon-color': '#dfeef7', 'fog-color': '#dfeef7', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.2 }); } catch (e) {}
   map.addSource('all', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: coords } } });
   map.addSource('done', { type: 'geojson', data: line(0) });
@@ -183,19 +183,27 @@ function render() {
     brg += d * 0.035;
     const want2 = clearPitch(p, brg);
     pit += (want2 - pit) * (want2 < pit ? 0.14 : 0.03);   // 가려지면 빨리 올라가고, 풀리면 천천히 내려온다
-    map.jumpTo({ center: [p.lon, p.lat], bearing: brg, pitch: pit, zoom: ZOOM, padding: PAD });
+    // 지형 자료가 아직 안 받아진 곳에서는 지도가 땅 높이를 0 으로 알아 카메라가 산속에
+    // 잠긴다. 그만큼 카메라를 뒤로 물려(줌을 낮춰) 항상 땅 위에 있게 한다.
+    let zoom = ZOOM;
+    const miss = p.ele * EXAG - (map.transform && map.transform.elevation || 0);
+    if (miss > 60) { const D = camDist(p); zoom = ZOOM - Math.log2((D + miss / Math.cos(rad(pit))) / D); }
+    map.jumpTo({ center: [p.lon, p.lat], bearing: brg, pitch: pit, zoom, padding: PAD });
   }
 }
 // 카메라와 현재 위치 사이를 산이 가리는지 본다. 가리면 더 위에서 내려다보도록
 // 기울기를 줄인다. 가파르고 높은 산에서 카메라가 능선 뒤로 숨는 것을 막는다.
-const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24;
+const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24, EXAG = 1.35;
 let pit = PITCH_MAX;
 function shift(p, deg, m) {
   return [p.lon + m*Math.sin(rad(deg)) / (111320*Math.cos(rad(p.lat))), p.lat + m*Math.cos(rad(deg)) / 111320];
 }
-function clearPitch(p, b) {
+function camDist(p) {            // 기본 줌에서 카메라까지 거리(m)
   const H = map.getContainer().clientHeight || 600;
-  const D = 1.5 * H * 40075016.686 * Math.cos(rad(p.lat)) / (512 * Math.pow(2, ZOOM));   // 카메라까지 거리(m)
+  return 1.5 * H * 40075016.686 * Math.cos(rad(p.lat)) / (512 * Math.pow(2, ZOOM));
+}
+function clearPitch(p, b) {
+  const D = camDist(p);
   for (let pitch = PITCH_MAX; pitch > PITCH_MIN; pitch -= 3) {
     const back = D*Math.sin(rad(pitch)), up = D*Math.cos(rad(pitch));
     let ok = true;
