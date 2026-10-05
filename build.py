@@ -1023,12 +1023,13 @@ def log_html(logs, mt_name=''):
                      if r else '')
             verdict = f'<div class="lg-verdict">{stars}<p>{e(lg.get("verdict", ""))}</p></div>'
         out.append(
-            f'<article class="lg"><header class="lg-head"><b class="lg-title">{e(lg.get("title", ""))}</b>'
+            f'<article class="lg"><header class="lg-head">'
+            + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
+               f'{e(lg["fly"].get("label") or "3D 코스 따라가 보기")}</a>' if lg.get('fly') else '')
+            + f'<b class="lg-title">{e(lg.get("title", ""))}</b>'
             + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')
             + f'<div class="lg-chips">{chips}</div></header>'
             + (f'<div class="lg-stats">{stats}</div>' if stats else '')
-            + (f'<p class="lg-fly"><a href="../assets/{e(lg["fly"]["file"])}">'
-               f'{e(lg["fly"].get("label") or "3D로 코스 따라가 보기")} →</a></p>' if lg.get('fly') else '')
             + ''.join(body) + tips_html + verdict + '</article>')
     return ''.join(out)
 
@@ -1507,8 +1508,12 @@ section h2{font-size:24px;font-weight:750}
 .lg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .lg-chip{font-size:12.5px;background:var(--green-soft);color:var(--green);border-radius:999px;padding:3px 10px;font-weight:600}
 .lg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
-.lg-fly{margin:12px 0 4px}
-.lg-fly a{display:inline-block;padding:10px 16px;border-radius:999px;background:#1f6f4a;color:#fff;font-weight:700;font-size:14px;text-decoration:none}
+.lg-fly{float:right;margin:-2px 0 10px 14px;display:inline-flex;align-items:center;gap:8px;padding:10px 16px 10px 11px;border-radius:999px;background:linear-gradient(135deg,#ff7a45,#ff3d2e);color:#fff;font-weight:800;font-size:14px;line-height:1;text-decoration:none;box-shadow:0 4px 14px rgba(255,80,50,.4);animation:lgfly 2.2s ease-in-out infinite}
+.lg-fly:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,80,50,.55)}
+.lg-fly-ic{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#fff;color:#ff3d2e;font-size:11px;padding-left:2px}
+@keyframes lgfly{0%,100%{box-shadow:0 4px 14px rgba(255,80,50,.4)}50%{box-shadow:0 4px 14px rgba(255,80,50,.4),0 0 0 7px rgba(255,80,50,.14)}}
+@media(prefers-reduced-motion:reduce){.lg-fly{animation:none}}
+.lg-stats{clear:both}
 .lg-stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
 .lg-stat b{display:block;font-size:16px;color:var(--green)}
 .lg-stat span{font-size:12px;color:var(--sub)}
@@ -1525,7 +1530,7 @@ section h2{font-size:24px;font-weight:750}
 .lg-verdict{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);text-align:center}
 .lg-stars{color:#d9a441;font-size:20px;letter-spacing:2px}
 .lg-verdict p{margin:6px 0 0}
-@media(max-width:560px){.lg{padding:16px}.lg-stats{grid-template-columns:repeat(2,1fr)}.lg-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.lg{padding:16px}.lg-fly{float:none;display:flex;justify-content:center;margin:0 0 12px}.lg-stats{grid-template-columns:repeat(2,1fr)}.lg-grid{grid-template-columns:1fr}}
 .notice{background:#fdf6e8;border:1px solid #f0dfb8;border-radius:10px;padding:11px 15px;font-size:13.5px;color:#7a5a12;margin:0 0 22px}
 .todo-msg{color:var(--sub)}
 
