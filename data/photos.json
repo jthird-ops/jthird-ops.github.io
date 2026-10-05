@@ -183,11 +183,13 @@
  },
  "덕유산": {
   "file": "덕유산.jpg",
-  "title": "Korea-Snow in Mt. Deogyu-Stairway-01.jpg",
-  "author": "Byungjoon Kim",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3AKorea-Snow_in_Mt._Deogyu-Stairway-01.jpg"
+  "title": "향적봉 정상에서 바라본 풍경",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-08-16"
  },
  "도락산": {
   "file": "도락산.jpg",
