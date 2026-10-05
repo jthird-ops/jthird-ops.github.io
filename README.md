@@ -36,6 +36,7 @@ python build.py
 | `tools/add_my_photo.py` | 직접 찍은 사진(HEIC 포함) 넣기 |
 | `tools/contact_sheet.py` | 사진 폴더 → 번호 붙인 컨택트 시트 |
 | `tools/make_3d.py` | GPX → 3D 등산코스 페이지 (`assets/3d/`). 틀은 `tools/3d_template.html` |
+| `tools/make_bgm.py` | 3D 페이지 배경음악(`assets/3d/bgm.mp3`)을 코드로 지어 합성. 남의 음원을 쓰지 않는다 |
 
 ## 본문 스키마 (`content/*.json`)
 

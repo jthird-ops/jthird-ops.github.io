@@ -14,7 +14,7 @@
 Pacer 가 내보낸 GPX 는 시각 끝에 Z 가 붙어 있지만 실제로는 현지 시각이라
 그대로 쓴다.
 """
-import argparse, json, math, os, re
+import argparse, hashlib, json, math, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +23,14 @@ def dist(a, b):
     x = math.radians(b[0] - a[0]) * math.cos(math.radians(a[1]))
     y = math.radians(b[1] - a[1])
     return 6371000 * math.hypot(x, y)
+
+
+def bgm_ver():
+    """배경음악 파일의 내용 해시 — 곡을 바꾸면 방문자가 새 것을 받도록 주소에 붙인다."""
+    try:
+        return hashlib.md5(open(os.path.join(ROOT, 'assets', '3d', 'bgm.mp3'), 'rb').read()).hexdigest()[:8]
+    except OSError:
+        return '0'
 
 
 def main():
@@ -61,7 +69,8 @@ def main():
               .replace('__SLUG__', a.slug).replace('__SUB__', a.sub)
               .replace('__KM__', repr(a.km)).replace('__CLOCK__', str(t0))
               .replace('__DURATION__', str(a.duration or max(75, round(a.km * 8))))
-              .replace('__PEAK__', json.dumps(a.peak, ensure_ascii=False)))
+              .replace('__PEAK__', json.dumps(a.peak, ensure_ascii=False))
+              .replace('__BGM__', bgm_ver()))
     dest = os.path.join(ROOT, 'assets', '3d', a.out + '.html')
     open(dest, 'w', encoding='utf-8').write(out)
     print(f'{dest}  (점 {len(track)}개, {pts[0][4]})')
