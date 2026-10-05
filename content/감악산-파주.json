@@ -156,6 +156,10 @@
           "30'57\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/gamaksan-2025-08-02.html",
+        "label": "3D 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "신암저수지에 비친 감악산",
