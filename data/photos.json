@@ -9,11 +9,13 @@
  },
  "북한산": {
   "file": "북한산.jpg",
-  "title": "Baegundae Terrace of Bukhansan in Spring in Korea.jpg",
-  "author": "Jo Hanshin",
-  "license": "CC0",
-  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3ABaegundae_Terrace_of_Bukhansan_in_Spring_in_Korea.jpg"
+  "title": "IMG_2943.HEIC",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-10-04"
  },
  "한라산": {
   "file": "한라산.jpg",
