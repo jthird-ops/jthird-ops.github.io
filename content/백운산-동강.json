@@ -166,6 +166,10 @@
           "37'31\"/km"
         ]
       ],
+      "fly": {
+        "file": "3d/baegunsan-donggang-2026-10-03.html",
+        "label": "3D 코스 따라가 보기"
+      },
       "sections": [
         {
           "heading": "백룡동굴 탐방센터에서 출발",
