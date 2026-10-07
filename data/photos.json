@@ -319,11 +319,13 @@
  },
  "유명산": {
   "file": "유명산.jpg",
-  "title": "Peak of Yumyeong Mountain.JPG",
-  "author": "G43",
-  "license": "CC BY 3.0",
-  "license_url": "https://creativecommons.org/licenses/by/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3APeak_of_Yumyeong_Mountain.JPG"
+  "title": "유명산 정상에서 바라본 풍경",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-08-09"
  },
  "장안산": {
   "file": "장안산.jpg",
@@ -558,12 +560,13 @@
  },
  "운악산": {
   "file": "운악산.jpg",
-  "title": "운악산 미륵바위",
-  "author": "장민옥",
-  "license": "공공누리 제1유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#01",
-  "source": "https://api.visitkorea.or.kr/",
-  "provider": "한국관광공사 포토코리아"
+  "title": "구름 사이로 드러난 운악산 기암절벽",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-08-23"
  },
  "재약산": {
   "file": "재약산.jpg",
