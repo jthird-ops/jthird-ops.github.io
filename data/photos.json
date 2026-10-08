@@ -61,11 +61,13 @@
  },
  "태백산": {
   "file": "태백산.jpg",
-  "title": "Taebaeksan 2016 12 30 winter.jpg",
-  "author": "Jyuri08",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3ATaebaeksan_2016_12_30_winter.jpg"
+  "title": "정상에서 바라본 눈 덮인 겨울 산줄기",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-12-25"
  },
  "소백산": {
   "file": "소백산.jpg",
