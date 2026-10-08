@@ -541,12 +541,13 @@
  },
  "용문산": {
   "file": "용문산.jpg",
-  "title": "용문산국민관광지",
-  "author": "한국관광공사 박성근",
-  "license": "공공누리 제1유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#01",
-  "source": "https://api.visitkorea.or.kr/",
-  "provider": "한국관광공사 포토코리아"
+  "title": "가섭봉 정상에서 내려다본 풍경",
+  "author": "직접 촬영",
+  "license": "직접 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2025-07-26"
  },
  "용화산": {
   "file": "용화산.jpg",
