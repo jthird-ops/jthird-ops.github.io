@@ -1001,7 +1001,10 @@ def log_html(logs, mt_name=''):
     if not logs:
         return ''
     out = []
-    for lg in sorted(logs, key=lambda x: x.get('date', ''), reverse=True):
+    # 기본은 최근 산행이 위. 연속 산행(종주)처럼 날짜순으로 읽혀야 하면 기록에 "seq" 를 준다
+    ordered = (sorted(logs, key=lambda x: x.get('seq', 0)) if any('seq' in x for x in logs)
+               else sorted(logs, key=lambda x: x.get('date', ''), reverse=True))
+    for lg in ordered:
         d = lg.get('date', '')
         chips = ''.join(f'<span class="lg-chip">{e(x)}</span>' for x in (
             d.replace('-', '.'), lg.get('start') and f'{lg["start"]} 출발', lg.get('weather')) if x)
