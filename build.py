@@ -327,13 +327,18 @@ INDEX_LD = '''<script type="application/ld+json">
 
 
 def done_badge(c):
-    """등반기록이 있는 산의 카드 사진 위 '완등' 배지. 가장 최근 산행 날짜를 쓴다."""
+    """등반기록이 있는 산의 카드 사진 위 '완등' 배지. 여러 번 오른 산은 날짜를 줄마다 적는다.
+    종주처럼 한 번의 산행을 여러 기록으로 나눈 경우("seq")는 마지막 날짜 하나만 쓴다."""
     logs = (c or {}).get('log') or []
-    ds = sorted(x.get('date', '') for x in logs if x.get('date'))
     if not logs:
         return ''
-    d = ds[-1][2:].replace('-', '.') if ds else ''
-    return f'<span class="done-badge">✓ 완등{" " + d if d else ""}</span>'
+    ds = sorted({x.get('date', '') for x in logs if x.get('date')})
+    if any('seq' in x for x in logs):
+        ds = ds[-1:]
+    fmt = [d[2:].replace('-', '.') for d in ds]
+    if len(fmt) > 1:
+        return '<span class="done-badge multi">' + '<br>'.join(f'✓ 완등 {d}' for d in fmt) + '</span>'
+    return f'<span class="done-badge">✓ 완등{" " + fmt[0] if fmt else ""}</span>'
 
 
 def build_index(mts):
@@ -1466,6 +1471,7 @@ section h2{font-size:24px;font-weight:750}
 .card-thumb{position:relative;display:block;aspect-ratio:4/3;overflow:hidden;background:#e8ece9}
 .pcard-img{position:relative}
 .done-badge{position:absolute;top:10px;left:10px;z-index:2;background:var(--green);color:#fff;font-size:12px;font-weight:700;font-style:normal;line-height:1;padding:6px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);letter-spacing:.2px;pointer-events:none}
+.done-badge.multi{line-height:1.5;border-radius:12px;text-align:left}
 .card-thumb img,.card-thumb svg{width:100%;height:100%;object-fit:cover;display:block;
   transition:transform .45s ease}
 .card:hover .card-thumb img{transform:scale(1.05)}
