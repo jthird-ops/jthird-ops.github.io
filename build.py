@@ -1009,8 +1009,13 @@ def log_html(logs, mt_name=''):
     # 기본은 최근 산행이 위. 연속 산행(종주)처럼 날짜순으로 읽혀야 하면 기록에 "seq" 를 준다
     ordered = (sorted(logs, key=lambda x: x.get('seq', 0)) if any('seq' in x for x in logs)
                else sorted(logs, key=lambda x: x.get('date', ''), reverse=True))
+    # 같은 산을 여러 번 올랐으면 기록마다 몇 번째 등반인지 제목 위에 크게 적는다 (종주 "seq" 는 한 번으로 본다)
+    NTH = ['첫 번째', '두 번째', '세 번째', '네 번째', '다섯 번째', '여섯 번째', '일곱 번째', '여덟 번째', '아홉 번째', '열 번째']
+    by_date = sorted({x.get('date', '') for x in logs}) if (len(logs) > 1 and not any('seq' in x for x in logs)) else []
     for lg in ordered:
         d = lg.get('date', '')
+        k = by_date.index(d) if d in by_date and len(by_date) > 1 else -1
+        nth = (f'<span class="lg-nth">{NTH[k] if k < len(NTH) else str(k + 1) + "번째"} 등반</span>' if k >= 0 else '')
         chips = ''.join(f'<span class="lg-chip">{e(x)}</span>' for x in (
             d.replace('-', '.'), lg.get('start') and f'{lg["start"]} 출발', lg.get('weather')) if x)
         stats = ''.join(f'<div class="lg-stat"><b>{e(v)}</b><span>{e(k)}</span></div>'
@@ -1043,7 +1048,7 @@ def log_html(logs, mt_name=''):
             f'<article class="lg"><header class="lg-head">'
             + (f'<a class="lg-fly" href="../assets/{e(lg["fly"]["file"])}?v={fly_ver(lg["fly"]["file"])}" target="_blank"><span class="lg-fly-ic" aria-hidden="true">▶</span>'
                f'{e(lg["fly"].get("label") or "3D 코스 따라가 보기")}</a>' if lg.get('fly') else '')
-            + f'<b class="lg-title">{e(lg.get("title", ""))}</b>'
+            + nth + f'<b class="lg-title">{e(lg.get("title", ""))}</b>'
             + (f'<p class="lg-sub">{e(lg["sub"])}</p>' if lg.get('sub') else '')
             + f'<div class="lg-chips">{chips}</div></header>'
             + (f'<div class="lg-stats">{stats}</div>' if stats else '')
@@ -1521,6 +1526,7 @@ section h2{font-size:24px;font-weight:750}
 .tips li{margin-bottom:8px}
 .lg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 22px}
 .lg+.lg{margin-top:18px}
+.lg-nth{display:inline-block;margin:0 0 10px;padding:6px 14px;border-radius:999px;background:var(--accent);color:#fff;font-size:15px;font-weight:800;letter-spacing:-.01em}
 .lg-title{display:block;font-size:18px;font-weight:750}
 .lg-sub{color:var(--sub);margin:4px 0 0;font-size:14px}
 .lg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}

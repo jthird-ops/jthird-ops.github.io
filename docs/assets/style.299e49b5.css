@@ -348,6 +348,7 @@ section h2{font-size:24px;font-weight:750}
 .tips li{margin-bottom:8px}
 .lg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 22px}
 .lg+.lg{margin-top:18px}
+.lg-nth{display:inline-block;margin:0 0 10px;padding:6px 14px;border-radius:999px;background:var(--accent);color:#fff;font-size:15px;font-weight:800;letter-spacing:-.01em}
 .lg-title{display:block;font-size:18px;font-weight:750}
 .lg-sub{color:var(--sub);margin:4px 0 0;font-size:14px}
 .lg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
