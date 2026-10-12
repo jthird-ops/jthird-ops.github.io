@@ -1155,7 +1155,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
 
   <div class="post-body">
     <div class="main">{main}</div>
-    <aside class="side{' side-free' if (c or {}).get('side_scroll') else ''}">
+    <aside class="side">
       {side_map(m, kmap)}
       <div class="fact">
         <dl>
@@ -1607,7 +1607,6 @@ dl.access dd{margin:0}
 
 /* 사이드 */
 .side{position:sticky;top:78px;display:flex;flex-direction:column;gap:16px;min-width:0}
-.side.side-free{position:static}  /* content 에 "side_scroll": true 면 오른쪽 칸이 본문과 함께 스크롤된다 */
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}
