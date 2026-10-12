@@ -483,5 +483,6 @@
   "trailmap": {
     "file": "log/도봉산-trailmap.jpg",
     "caption": "도봉탐방지원센터 입구 탐방로 안내"
-  }
+  },
+  "side_scroll": true
 }
