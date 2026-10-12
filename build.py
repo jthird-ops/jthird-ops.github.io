@@ -1122,7 +1122,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
         main = f"""<div class="lede">{intro}</div>
     {section('등반기록', log_html(c.get('log'), m['name']))}
     {section('이 산의 포인트', hl_html)}
-    {section('등산 코스', courses)}
+    {section('대표 등산코스', courses)}
     {section('인증장소', f'<p>{e(c["cert"])}</p>' if c.get('cert') else '')}
     {section('가는 길', access)}
     {section('주차장', parking_html(c.get('parking'), m['name']))}
