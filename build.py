@@ -519,7 +519,7 @@ def build_index(mts):
 <div id="tab-map" class="tabpanel" hidden>
   <section id="map" class="map-section">
     <h2>지도로 한눈에 보기</h2>
-    <p class="sub">시도별로 색을 나눴습니다. 점을 누르면 해당 글로, 아래 지역 버튼을 누르면 그 지역만 지도에 남습니다.</p>
+    <p class="sub">시도별로 색을 나눴습니다. 점을 누르면 해당 글로 이동합니다. 지역 버튼이나 지도 위 시도를 누르면 그 지역이 확대되고, 다시 누르거나 '전체'를 누르면 원래대로 돌아옵니다.</p>
     <div class="chips chips-map">{''.join(chips)}</div>
     <div class="map-box">
       <svg class="kmap" id="kmap" viewBox="{kmap['viewBox']}" width="{kmap['width']}" height="{kmap['height']}" role="img"
@@ -1430,16 +1430,16 @@ section h2{font-size:24px;font-weight:750}
 .kmap .prov[data-region="제주도"] path{fill:#f1e6ef}
 
 /* 시도 이름 */
-.kmap .plabel{font-family:inherit;font-size:26px;font-weight:700;fill:#6f7a86;
+.kmap .plabel{font-family:inherit;font-size:calc(26px * var(--s,1));font-weight:700;fill:#6f7a86;
   text-anchor:middle;dominant-baseline:middle;pointer-events:none;
-  paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round;
+  paint-order:stroke;stroke:#fff;stroke-width:calc(5px * var(--s,1));stroke-linejoin:round;
   transition:opacity .18s ease}
 
 /* 마커 */
-.kmap .pins circle{fill:#1d7a4c;stroke:#fff;stroke-width:3.5;cursor:pointer;
+.kmap .pins circle{fill:#1d7a4c;stroke:#fff;stroke-width:calc(3.5px * var(--s,1));cursor:pointer;
   transition:r .12s ease,fill .12s ease,opacity .18s ease}
-.kmap .pins a:hover circle{r:21;fill:var(--accent)}
-.kmap .pins a:focus-visible circle{r:21;outline:none;fill:var(--accent)}
+.kmap .pins a:hover circle{r:calc(21px * var(--s,1));fill:var(--accent)}
+.kmap .pins a:focus-visible circle{r:calc(21px * var(--s,1));outline:none;fill:var(--accent)}
 
 /* 지역 버튼을 누르면 그 시도만 남기고 나머지는 흐리게 */
 .kmap.filtered .prov:not(.on) path{opacity:.22}
@@ -1803,6 +1803,45 @@ JS = r"""
     });
   }
 
+  // 지역을 고르면 그 시도 쪽으로 지도를 확대한다 ('전체'면 원래대로)
+  var vb0 = kmap ? kmap.getAttribute('viewBox').split(' ').map(Number) : null, vbNow = vb0, anim = 0;
+  function setVB(v) {
+    vbNow = v;
+    kmap.setAttribute('viewBox', v.map(function (n) { return n.toFixed(1); }).join(' '));
+    var s = Math.max(0.3, Math.min(1, 1.6 * v[2] / vb0[2]));   // 확대할수록 점·글자를 줄여 화면 크기를 비슷하게
+    kmap.style.setProperty('--s', s.toFixed(3));
+    kmap.querySelectorAll('.pins circle').forEach(function (c) { c.setAttribute('r', (14 * s).toFixed(1)); });
+  }
+  function zoomMap() {
+    if (!kmap || !vb0) return;
+    var to = vb0.slice();
+    if (region !== '전체') {
+      var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
+      kmap.querySelectorAll('.prov.on, .pins a.on circle').forEach(function (el) {
+        try { var b = el.getBBox(); } catch (err) { return; }
+        if (!b.width && !b.height && el.tagName !== 'circle') return;
+        x1 = Math.min(x1, b.x); y1 = Math.min(y1, b.y);
+        x2 = Math.max(x2, b.x + b.width); y2 = Math.max(y2, b.y + b.height);
+      });
+      if (x2 > x1) {
+        var w = x2 - x1, h = y2 - y1, p = Math.max(w, h) * 0.12 + 30;
+        to = [x1 - p, y1 - p, w + 2 * p, h + 2 * p];
+      }
+    }
+    var from = vbNow.slice(), t0 = performance.now(), id = ++anim;
+    (function step(t) {
+      if (id !== anim) return;
+      var k = Math.min(1, (t - t0) / 550), q = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setVB(from.map(function (a, i) { return a + (to[i] - a) * q; }));
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  // 지도 위 시도를 직접 눌러도 그 지역으로 확대된다. 확대된 지역을 다시 누르면 전체로.
+  if (kmap) kmap.querySelectorAll('.prov').forEach(function (g) {
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', function () { pick(region === g.dataset.region ? '전체' : g.dataset.region); });
+  });
+
   function pick(r) {
     region = r;
     chips.forEach(function (x) {
@@ -1810,6 +1849,7 @@ JS = r"""
     });
     apply();
     paintMap();
+    zoomMap();
   }
 
   // '지역별로 한눈에'에서 지역 이름을 누르면 그 지역만 걸러 목록 탭으로 넘어간다
