@@ -1120,7 +1120,6 @@ def build_mountain(m, prev, nxt, kmap, photos):
             for s in src) + '</ul>') if src else ''
 
         main = f"""<div class="lede">{intro}</div>
-    {section('등반기록', log_html(c.get('log'), m['name']))}
     {section('이 산의 포인트', hl_html)}
     {section('대표 등산코스', courses)}
     {section('인증장소', f'<p>{e(c["cert"])}</p>' if c.get('cert') else '')}
@@ -1129,6 +1128,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
     {section('맛집', food_html(c.get('food'), m['name']))}
     {section('언제 가면 좋은가', f'<p>{e(c["season"])}</p>' if c.get('season') else '')}
     {section('알아두면 좋은 것', tips_html)}
+    {section('등반기록', log_html(c.get('log'), m['name']))}
     {section('참고한 곳', src_html)}"""
         desc = c['summary']
 
