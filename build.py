@@ -216,7 +216,7 @@ def credit_line(ph, short=False):
     prov = ph.get('provider')
     if ph.get('own'):                       # 직접 찍은 사진
         d = f" · {e(ph['date'])}" if ph.get('date') else ''
-        return ('직접 촬영' if short else f'직접 촬영{d}')
+        return ('사진 촬영' if short else f'사진 촬영{d}')
     if short:
         return f"© {a} · {e(prov) + ' · ' if prov else ''}{e(ph['license'])}"
     lic = (f'<a href="{e(ph["license_url"])}" target="_blank" rel="noopener">{e(ph["license"])}</a>'
@@ -444,7 +444,7 @@ def build_index(mts):
     hero = photos.get('hero')
     hero_bg = (f'<img class="vhero-bg" src="{img("assets/photos/" + hero["file"])}" alt="" '
                f'fetchpriority="high" decoding="async">') if hero else ''
-    hero_credit = (f'<p class="vhero-credit">사진 {credit_line(hero)}</p>') if hero else ''
+    hero_credit = (f'<p class="vhero-credit">{'' if hero.get('own') else '사진 '}{credit_line(hero)}</p>') if hero else ''
 
     body = f"""
 <section class="vhero">
@@ -849,11 +849,11 @@ def build_credits(mts, photos):
     name = {m['slug']: m['name'] for m in mts}
     groups = {}
     for k, v in photos.items():
-        label = ('직접 촬영' if v.get('own')
+        label = ('사진 촬영' if v.get('own')
                  else v.get('provider') or '위키미디어 공용')
         groups.setdefault(label, []).append((k, v))
 
-    order = ['위키미디어 공용', '한국관광공사 포토코리아', '한국관광공사 TourAPI', '직접 촬영']
+    order = ['위키미디어 공용', '한국관광공사 포토코리아', '한국관광공사 TourAPI', '사진 촬영']
     blocks = []
     for g in order + [x for x in groups if x not in order]:
         if g not in groups:
@@ -1077,7 +1077,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
     ph = photos.get(m['slug'])
     cover = (f'<figure class="cover"><img src="../{img("assets/photos/" + ph["file"])}" '
              f'alt="{e(m["name"])} 사진" decoding="async">'
-             f'<figcaption>사진 {credit_line(ph)}</figcaption></figure>') if ph else (
+             f'<figcaption>{"" if ph.get("own") else "사진 "}{credit_line(ph)}</figcaption></figure>') if ph else (
              f'<figure class="cover illus">{ridge_svg(m, vb="0 96 400 172")}'
              f'<figcaption>사진 준비 중 — 높이와 지역으로 그린 이미지입니다</figcaption></figure>')
 

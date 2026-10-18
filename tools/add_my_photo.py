@@ -74,8 +74,8 @@ def main():
     photos[slug] = {
         "file": slug + '.jpg',
         "title": os.path.basename(src),
-        "author": '직접 촬영',
-        "license": '직접 촬영',
+        "author": '사진 촬영',
+        "license": '사진 촬영',
         "license_url": '',
         "source": '',
         "own": True,
