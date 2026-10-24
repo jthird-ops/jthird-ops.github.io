@@ -345,6 +345,20 @@ def build_index(mts):
     import _guestbook, _appcount           # 방명록·다운로드 수 (Firebase)
     import _appshot                        # 어플 소개와 화면
     courses = sum(len(m['content']['courses']) for m in mts if m['content'])
+    # 내가 다녀온 산: 등반기록이 있는 산 수, 기록의 이동 거리 합(여러 번 오른 산·종주는 모두 더함), 오른 산의 정상 높이 합
+    import re as _re
+    my_n = my_km = my_top = 0
+    for m in mts:
+        logs = (m['content'] or {}).get('log') or []
+        if not logs:
+            continue
+        my_n += 1
+        my_top += m['heightM']
+        for lg in logs:
+            v = dict(lg.get('stats', [])).get('이동 거리', '')
+            x = _re.search(r'[\d.]+', v.replace(',', ''))
+            my_km += float(x.group()) if x else 0
+    my_top_km = my_top / 1000
     by_region = {}
     for m in mts:
         by_region.setdefault(m['region'], []).append(m)
@@ -460,10 +474,9 @@ def build_index(mts):
 
 <section class="statbar">
   <div class="stats">
-    <div><b>100</b><span>대상 산</span></div>
-    <div><b>{courses}</b><span>등산 코스</span></div>
-    <div><b>{len(by_region)}</b><span>지역</span></div>
-    <div><b>1950m</b><span>최고 · 한라산</span></div>
+    <div><b>{my_n}<small>/100</small></b><span>등반한 산 · {my_n}%</span></div>
+    <div><b>{my_km:,.1f}km</b><span>걸은 거리 (누적)</span></div>
+    <div><b>{my_top_km:,.1f}km</b><span>정상 고도 합 (오른 산 기준)</span></div>
   </div>
 </section>
 
@@ -1243,6 +1256,7 @@ header.site nav a:hover{color:var(--green)}
 .stats{display:flex;flex-wrap:wrap;gap:44px;max-width:var(--max);margin:0 auto}
 .stats div{display:flex;flex-direction:column}
 .stats b{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.stats b small{font-size:15px;font-weight:600;color:var(--sub);margin-left:3px;letter-spacing:0}
 .stats span{font-size:12.5px;color:var(--sub)}
 
 
