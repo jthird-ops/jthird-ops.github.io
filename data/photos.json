@@ -646,12 +646,13 @@
  },
  "가야산-충남": {
   "file": "가야산-충남.jpg",
-  "title": "가야산(서산)",
-  "author": "한국관광공사",
-  "license": "공공누리 제3유형",
-  "license_url": "https://www.kogl.or.kr/info/license.do#03",
-  "source": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=125822",
-  "provider": "한국관광공사 TourAPI"
+  "title": "IMG_5301.HEIC",
+  "author": "사진 촬영",
+  "license": "사진 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-10-24"
  },
  "계방산": {
   "file": "계방산.jpg",
