@@ -145,8 +145,13 @@ map.on('load', () => {
   map.resize(); map.fitBounds(bounds, { padding: {top: 90, bottom: 230, left: 40, right: 40}, pitch: 55, bearing: -20, duration: 0 });
   try { map.setTerrain({ source: 'dem', exaggeration: EXAG }); } catch (e) { console.warn('terrain', e); }
   try { map.setSky && map.setSky({ 'sky-color': '#8ec5ee', 'horizon-color': '#dfeef7', 'fog-color': '#dfeef7', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.2 }); } catch (e) {}
+  if (RELIEF) {   // 입체감 강화: 음영 기복 + 경로 발광 (낮은 산에서 지형이 밋밋해 보일 때)
+    try { map.addLayer({ id: 'hill', type: 'hillshade', source: 'dem', paint: { 'hillshade-exaggeration': 0.6, 'hillshade-shadow-color': '#0a1a10', 'hillshade-highlight-color': '#fff6dc', 'hillshade-accent-color': '#1b2430', 'hillshade-illumination-direction': 300, 'hillshade-illumination-anchor': 'map' } }); } catch (e) { console.warn('hillshade', e); }
+    try { map.setSky && map.setSky({ 'sky-color': '#7fb8e6', 'horizon-color': '#e6f1f8', 'fog-color': '#e6f1f8', 'sky-horizon-blend': 0.7, 'horizon-fog-blend': 0.8, 'fog-ground-blend': 0.4 }); } catch (e) {}
+  }
   map.addSource('all', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: coords } } });
   map.addSource('done', { type: 'geojson', data: line(0) });
+  if (RELIEF) map.addLayer({ id: 'all-glow', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#ffb199', 'line-opacity': .35, 'line-width': 14, 'line-blur': 6 } });
   map.addLayer({ id: 'all-c', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#000', 'line-opacity': .35, 'line-width': 7} });
   map.addLayer({ id: 'all', type: 'line', source: 'all', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#fff', 'line-opacity': .85, 'line-width': 3.5} });
   map.addLayer({ id: 'done', type: 'line', source: 'done', layout: {'line-cap': 'round', 'line-join': 'round'}, paint: {'line-color': '#ff5a3c', 'line-width': 5.5} });
@@ -231,7 +236,7 @@ function render() {
 }
 // 카메라와 현재 위치 사이를 산이 가리는지 본다. 가리면 더 위에서 내려다보도록
 // 기울기를 줄인다. 가파르고 높은 산에서 카메라가 능선 뒤로 숨는 것을 막는다.
-const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24, EXAG = 1.35;
+const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24, EXAG = 2.0, RELIEF = true;
 let pit = PITCH_MAX;
 function shift(p, deg, m) {
   return [p.lon + m*Math.sin(rad(deg)) / (111320*Math.cos(rad(p.lat))), p.lat + m*Math.cos(rad(deg)) / 111320];

@@ -64,6 +64,8 @@ def write(cfg):
               .replace('__DURATION__', str(cfg['duration']))
               .replace('__PEAK__', json.dumps(cfg['peak'], ensure_ascii=False))
               .replace('__MARKS__', json.dumps(marks(cfg), ensure_ascii=False, separators=(',', ':')))
+              .replace('__EXAG__', repr(float(cfg.get('exag', 1.35))))
+              .replace('__RELIEF__', 'true' if cfg.get('relief') else 'false')
               .replace('__BGM__', bgm_ver()))
     dest = os.path.join(ROOT, 'assets', '3d', cfg['out'] + '.html')
     open(dest, 'w', encoding='utf-8').write(out)
@@ -87,6 +89,8 @@ def main():
     ap.add_argument('--peak', default='', help="최고 지점 라벨. 비우면 GPS 고도로 표기, '-' 면 표기 안 함(지도 지명과 겹칠 때)")
     ap.add_argument('--mark', action='append', default=[], help="코스 지점 '시:분=이름' (여러 번 가능)")
     ap.add_argument('--duration', type=int, default=0, help="'보통' 속도 전체 재생 초")
+    ap.add_argument('--exag', type=float, default=1.35, help='지형 과장 배율 (낮은 산은 1.8~2.2)')
+    ap.add_argument('--relief', action='store_true', help='음영 기복·경로 발광으로 입체감 강화')
     a = ap.parse_args()
 
     s = open(a.gpx, encoding='utf-8').read()
@@ -106,7 +110,7 @@ def main():
     keep.append(pts[-1])
     t0 = keep[0][3]
     cfg = {'out': a.out, 'slug': a.slug, 'name': a.name, 'sub': a.sub, 'km': a.km, 'peak': a.peak,
-           'duration': a.duration or max(75, round(a.km * 8)), 'marks': a.mark, 'date': pts[0][4], 'clock': t0,
+           'duration': a.duration or max(75, round(a.km * 8)), 'marks': a.mark, 'exag': a.exag, 'relief': a.relief, 'date': pts[0][4], 'clock': t0,
            'track': [[round(p[0], 6), round(p[1], 6), round(p[2], 1), (p[3] - t0) % 86400] for p in keep]}
     os.makedirs(store, exist_ok=True)
     json.dump(cfg, open(os.path.join(store, a.out + '.json'), 'w', encoding='utf-8'),
