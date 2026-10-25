@@ -236,7 +236,7 @@ function render() {
 }
 // 카메라와 현재 위치 사이를 산이 가리는지 본다. 가리면 더 위에서 내려다보도록
 // 기울기를 줄인다. 가파르고 높은 산에서 카메라가 능선 뒤로 숨는 것을 막는다.
-const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24, EXAG = 2.0, RELIEF = true;
+const ZOOM = 15.4, PITCH_MAX = 66, PITCH_MIN = 24, EXAG = 1.6, RELIEF = true;
 let pit = PITCH_MAX;
 function shift(p, deg, m) {
   return [p.lon + m*Math.sin(rad(deg)) / (111320*Math.cos(rad(p.lat))), p.lat + m*Math.cos(rad(deg)) / 111320];
