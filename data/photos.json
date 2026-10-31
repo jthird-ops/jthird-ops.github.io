@@ -355,11 +355,13 @@
  },
  "청계산": {
   "file": "청계산.jpg",
-  "title": "Cheonggyesan Clear Forest Park 01.jpg",
-  "author": "*Youngjin",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
-  "source": "https://commons.wikimedia.org/wiki/File%3ACheonggyesan_Clear_Forest_Park_01.jpg"
+  "title": "IMG_5564.HEIC",
+  "author": "사진 촬영",
+  "license": "사진 촬영",
+  "license_url": "",
+  "source": "",
+  "own": true,
+  "date": "2026-10-31"
  },
  "치악산": {
   "file": "치악산.jpg",
