@@ -75,6 +75,15 @@ PICKS = {
     "가야산-합천":     ("File:Kayasan04.JPG", 1200),
     "소요산":         ("File:Soyosan.jpg", 1200),
     "천성산":         ("File:Cheonsung.JPG", 1200),
+    "운문산":         ("File:Sariam from Sansingak.jpg", 1200),
+    "적상산":         ("File:Muju-Jeoksangsan-Fortress.jpg", 1200),
+    "성인봉":         ("File:울릉 성인봉 원시림 2.jpg", 1200),
+    "축령산-남양주":   ("File:View from Chukryeongsan 3.jpg", 1200),
+    "덕숭산":         ("File:충남 예산군 덕숭산 수덕사 Korea - panoramio.jpg", 1200),
+    "미륵산":         ("File:Tongyeong Mt-Miruek Peak.jpg", 1200),
+    "추월산":         ("File:Photo 2025-06-01-폭포사진-하늘과폭포-추월산.jpg", 1200),
+    "금산-남해":       ("File:Geumsan Sanjang in Namhae, Gyeongsangnam-do.jpg", 1200),
+    "무학산":         ("File:Changwon Masanhoewon-gu.jpg", 1200),
 }
 
 LICENSE_URL = {
@@ -104,7 +113,7 @@ def info(title, width):
     return p['imageinfo'][0]
 
 
-SLEEP = 2.5          # Commons 는 연속 요청에 429 를 준다. 넉넉히 쉰다.
+SLEEP = 12          # Commons 는 연속 요청에 429 를 준다. 넉넉히 쉰다.
 
 
 def fetch(url, tries=6):
