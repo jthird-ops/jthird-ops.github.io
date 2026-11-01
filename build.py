@@ -260,6 +260,10 @@ def load_forest():
 
 
 # ---------------------------------------------------------------- 공통 셸
+GOATCOUNTER = ('<script data-goatcounter="https://jthird.goatcounter.com/count" '
+               'async src="//gc.zgo.at/count.js"></script>')
+
+
 def page(title, body, depth=0, desc="", extra_head="", image="", path="", og_type="article"):
     up = '../' * depth
     # 파일 이름이 한글이라 og:image·canonical 은 퍼센트 인코딩해 둔다.
@@ -289,6 +293,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path="", og_typ
 <link rel="apple-touch-icon" href="{up}{img('assets/apple-touch-icon.png')}">
 <link rel="stylesheet" href="{up}{ASSET['css']}">
 {extra_head}
+{GOATCOUNTER}
 </head>
 <body>
 <header class="site">
