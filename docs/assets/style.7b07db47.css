@@ -439,6 +439,8 @@ dl.access dd{margin:0}
 /* 레이아웃 시험: 본문을 대표사진과 같은 가로폭으로 펼치고, 지도·정보는 그 위에 가로로 놓는다 */
 .post-body.wide{grid-template-columns:minmax(0,1fr);gap:28px}
 .post-body.wide{display:block;margin-top:14px}
+.blk-2col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 36px;align-items:start}
+@media (max-width:760px){.blk-2col{grid-template-columns:minmax(0,1fr)}}
 .post-body.wide .side{float:right;width:300px;max-width:100%;margin:0 0 20px 32px}
 .post-body.wide .main::after{content:"";display:block;clear:both}
 @media (max-width:900px){.post-body.wide .side{float:none;width:100%;margin:0 0 24px}}
