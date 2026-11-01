@@ -431,6 +431,7 @@ dl.access dd{margin:0}
 
 /* 사이드 */
 .side{position:sticky;top:78px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.side.side-flow{position:static}
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}

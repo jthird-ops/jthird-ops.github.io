@@ -1092,6 +1092,10 @@ def log_html(logs, mt_name=''):
     return ''.join(out)
 
 
+# 옆칸(지도·좌표·정보)이 스크롤을 따라오지 않고 본문과 함께 올라가 사라지게 할 산 (레이아웃 시험용)
+SIDE_FLOW = {'청계산'}
+
+
 def side_map(m, kmap):
     """옆칸 지도. 본문에 trailmap 이 있으면 등산지도를 싣고, 누르면 크게 보인다.
     없으면 위치만 찍은 미니맵을 쓴다."""
@@ -1191,7 +1195,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
 
   <div class="post-body">
     <div class="main">{main}</div>
-    <aside class="side">
+    <aside class="side{' side-flow' if m['slug'] in SIDE_FLOW else ''}">
       {side_map(m, kmap)}
       <div class="fact">
         <dl>
@@ -1645,6 +1649,7 @@ dl.access dd{margin:0}
 
 /* 사이드 */
 .side{position:sticky;top:78px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.side.side-flow{position:static}
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}
