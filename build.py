@@ -1205,7 +1205,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
     {section('인증장소', f'<p>{e(c["cert"])}</p>' if c.get('cert') else '')}
     {section('가는 길', access)}
     {pair(section('주차장', parking_html(c.get('parking'), m['name'])),
-          section('맛집', food_html(c.get('food'), m['name'])), m['slug'] in SIDE_FLOW)}
+          section('맛집', food_html(c.get('food'), m['name'])), False)}
     {section('언제 가면 좋은가', f'<p>{e(c["season"])}</p>' if c.get('season') else '')}
     {section('알아두면 좋은 것', tips_html)}
     {section('등반기록', log_html(c.get('log'), m['name']))}
@@ -1700,8 +1700,9 @@ dl.access dd{margin:0}
 /* 레이아웃 시험: 본문을 대표사진과 같은 가로폭으로 펼치고, 지도·정보는 그 위에 가로로 놓는다 */
 .post-body.wide{grid-template-columns:minmax(0,1fr);gap:28px}
 .post-body.wide{display:block;margin-top:14px}
-.blk-2col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 36px;align-items:start}
-@media (max-width:760px){.blk-2col{grid-template-columns:minmax(0,1fr)}}
+.post-body.wide .pk-list,.post-body.wide .fd-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;align-items:start}
+.post-body.wide .pk-list>li,.post-body.wide .fd-list>li{margin:0}
+@media (max-width:760px){.post-body.wide .pk-list,.post-body.wide .fd-list{grid-template-columns:minmax(0,1fr)}}
 .post-body.wide .side{float:right;width:300px;max-width:100%;margin:0 0 20px 32px}
 .post-body.wide .main::after{content:"";display:block;clear:both}
 @media (max-width:900px){.post-body.wide .side{float:none;width:100%;margin:0 0 24px}}
