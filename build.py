@@ -245,6 +245,20 @@ def load():
     return mts
 
 
+def load_forest():
+    """산림청 100대 명산 중 블랙야크 100대 명산에 없는 산. 높은 순."""
+    p = os.path.join(ROOT, 'data/forest_mountains.json')
+    if not os.path.exists(p):
+        return []
+    fm = json.load(open(p, encoding='utf-8'))
+    for m in fm:
+        m['forest'] = True
+        cp = os.path.join(ROOT, 'content', m['slug'] + '.json')
+        m['content'] = json.load(open(cp, encoding='utf-8')) if os.path.exists(cp) else None
+    fm.sort(key=lambda m: m['order'])
+    return fm
+
+
 # ---------------------------------------------------------------- 공통 셸
 def page(title, body, depth=0, desc="", extra_head="", image="", path="", og_type="article"):
     up = '../' * depth
@@ -296,7 +310,7 @@ def page(title, body, depth=0, desc="", extra_head="", image="", path="", og_typ
   </a>
   <nav>
     <a href="{up}index.html#tab-list">100대 명산</a>
-    <a href="{up}index.html#tab-photos">대표 명산</a>
+    <a href="{up}index.html#tab-photos">산림청 명산</a>
     <a href="{up}index.html#tab-map">지도</a>
     <a href="{up}index.html#tab-regions">지역별</a>
     <a href="{up}index.html#tab-auth">인증방법</a>
@@ -341,7 +355,7 @@ def done_badge(c):
     return f'<span class="done-badge">✓ 완등{" " + fmt[0] if fmt else ""}</span>'
 
 
-def build_index(mts):
+def build_index(mts, forest=()):
     import _guestbook, _appcount           # 방명록·다운로드 수 (Firebase)
     import _appshot                        # 어플 소개와 화면
     courses = sum(len(m['content']['courses']) for m in mts if m['content'])
@@ -434,25 +448,28 @@ def build_index(mts):
             f'<span>{len(ms)}</span></button></h3>'
             f'<div class="pills">{items}</div></div>')
 
-    # 사진이 있는 산 중 높은 순으로 12곳만 대표로 세운다
-    featured = sorted((m for m in mts if m['slug'] in photos),
-                      key=lambda m: -m['heightM'])[:12]
-    featured.sort(key=lambda m: m['rank'])
+    # 산림청 100대 명산 중 블랙야크 100대 명산에 없는 산 (이미 100대 목록에 있는 산과 겹치지 않게)
     pcards = []
-    for m in featured:
-        ph = photos[m['slug']]
+    for m in forest:
+        ph = photos.get(m['slug'])
         c = m['content']
+        if ph:
+            thumb = (f'<img src="{img("assets/photos/" + thumb_file(ph))}" '
+                     f'alt="{e(m["name"])} 사진" loading="lazy" decoding="async">')
+            credit = f'<span class="pcard-credit">{credit_line(ph, short=True)}</span>'
+        else:
+            thumb = ridge_svg(m, vb="0 96 400 172")
+            credit = ''
         pcards.append(f"""
       <a class="pcard" href="mountain/{e(m['slug'])}.html">
-        <span class="pcard-img"><img src="{img("assets/photos/" + thumb_file(ph))}"
-             alt="{e(m['name'])} 사진" loading="lazy" decoding="async">{done_badge(c)}</span>
+        <span class="pcard-img{'' if ph else ' illus'}">{thumb}</span>
         <span class="pcard-body">
           <span class="pc-top"><i>{e(m['region'])}</i><b>{e(m['height'])}</b></span>
           <strong>{e(m['name'])}</strong>
           <span class="pc-sum">{e(c['summary'] if c else '')}</span>
-          <span class="pc-go">기록 보기 →</span>
+          <span class="pc-go">소개 보기 →</span>
         </span>
-        <span class="pcard-credit">{credit_line(ph, short=True)}</span>
+        {credit}
       </a>""")
 
     hero = photos.get('hero')
@@ -487,7 +504,7 @@ def build_index(mts):
   </button>
   <button class="menu-card" data-tab="tab-photos">
     <span class="mc-bg">{menu_photo('설악산', photos)}</span>
-    <span class="mc-txt"><i>02</i><b>대표 명산 12곳</b><em>사진으로 둘러보기</em></span>
+    <span class="mc-txt"><i>02</i><b>산림청 명산 {len(forest)}곳</b><em>블랙야크 100대에 없는 산</em></span>
   </button>
   <button class="menu-card art" data-tab="tab-map">
     <span class="mc-bg">{mc_map}</span>
@@ -522,8 +539,8 @@ def build_index(mts):
 
 <div id="tab-photos" class="tabpanel" hidden>
   <section id="photos" class="photos">
-    <h2>대표 명산 {len(pcards)}곳</h2>
-    <p class="sub">사진을 누르면 그 산의 기록으로 이동합니다.</p>
+    <h2>산림청 100대 명산 중 블랙야크에 없는 {len(pcards)}곳</h2>
+    <p class="sub">산림청이 2002년에 선정한 100대 명산 가운데 블랙야크 100대 명산에는 없는 산입니다. 카드를 누르면 그 산의 소개 페이지로 이동합니다.</p>
     <div class="pgrid">{''.join(pcards)}</div>
     <p class="more-link"><a href="#tab-list">100개 산 전체 목록 보기 →</a></p>
   </section>
@@ -860,6 +877,7 @@ def build_credits(mts, photos):
     표시 위치는 자유이므로 첫 페이지 대신 이 페이지에 모으고 푸터에서 링크한다.
     """
     name = {m['slug']: m['name'] for m in mts}
+    name.update({m['slug']: m['name'] for m in load_forest()})
     groups = {}
     for k, v in photos.items():
         label = ('사진 촬영' if v.get('own')
@@ -1096,7 +1114,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
 
     if not c:
         main = f"""<p class="todo-msg">아직 글이 준비되지 않은 산입니다. 코스·인증장소·교통 정보를 정리하는 대로 업데이트합니다.</p>"""
-        desc = f"{m['name']} {m['height']} · {m['region']} — 블랙야크 100대 명산"
+        desc = f"{m['name']} {m['height']} · {m['region']} — {'산림청 100대 명산' if m.get('forest') else '블랙야크 100대 명산'}"
     else:
         intro = ''.join(f'<p>{e(p)}</p>' for p in c.get('intro', []))
 
@@ -1156,9 +1174,9 @@ def build_mountain(m, prev, nxt, kmap, photos):
     body = f"""
 <article class="post">
   <div class="post-head">
-    <p class="crumb"><a href="../index.html">전체 목록</a> › {e(m['region'])}</p>
+    <p class="crumb">{'<a href="../index.html#tab-photos">산림청 명산</a>' if m.get('forest') else '<a href="../index.html">전체 목록</a>'} › {e(m['region'])}</p>
     <h1>{e(m['name'])}</h1>
-    <p class="meta"><span class="badge">100대 명산 #{m['rank']}</span>
+    <p class="meta"><span class="badge">{'산림청 100대 명산' if m.get('forest') else '100대 명산 #' + str(m['rank'])}</span>
        <span>{e(m['height'])}</span><span>{e(m['region'])}</span>
        {f'<span class="upd">{e(updated)} 기준</span>' if updated else ''}</p>
     {f'<p class="summary">{e(c["summary"])}</p>' if c else ''}
@@ -1174,7 +1192,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
         <dl>
           <dt>높이</dt><dd>{e(m['height'])}</dd>
           <dt>지역</dt><dd>{e(m['region'])}</dd>
-          <dt>번호</dt><dd>{m['rank']} / 100</dd>
+          {'<dt>분류</dt><dd>산림청 100대 명산 (블랙야크 100대에는 없음)</dd>' if m.get('forest') else f"<dt>번호</dt><dd>{m['rank']} / 100</dd>"}
           <dt>좌표</dt><dd>{m['lat']:.3f}, {m['lon']:.3f}</dd>
         </dl>
       </div>
@@ -1366,6 +1384,7 @@ header.site nav a:hover{color:var(--green)}
   box-shadow:0 14px 34px rgba(20,40,30,.13)}
 .pcard-img{display:block;aspect-ratio:4/3;overflow:hidden;background:#e8ece9}
 .pcard-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pcard-img svg{width:100%;height:100%;display:block}
 .pcard:hover .pcard-img img{transform:scale(1.06)}
 .pcard-body{display:flex;flex-direction:column;gap:6px;padding:16px 18px 18px}
 .pc-top{display:flex;align-items:center;gap:8px;font-size:11.5px}
@@ -1890,6 +1909,7 @@ def main():
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
     import _guestbook, _appcount, _appshot, _visits
     mts = load()
+    forest = load_forest()
     kmap = load_map()
     photos = load_photos()
     if os.path.isdir(OUT):
@@ -1961,7 +1981,7 @@ def main():
              encoding='utf-8').write(solo)
         print(f'어플: 산 목록·지도를 블로그 데이터로 통일 (내려받기용 한 파일 판 포함)')
 
-    open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(build_index(mts))
+    open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(build_index(mts, forest))
     gb_cfg = _guestbook.config()
     open(os.path.join(OUT, 'guestbook.html'), 'w', encoding='utf-8').write(
         page('방명록 — ' + SITE, _guestbook.body(gb_cfg), 0,
@@ -1981,10 +2001,16 @@ def main():
         open(os.path.join(OUT, 'mountain', m['slug'] + '.html'), 'w', encoding='utf-8') \
             .write(build_mountain(m, prev, nxt, kmap, photos))
 
+    for i, m in enumerate(forest):
+        prev = forest[i - 1] if i > 0 else None
+        nxt = forest[i + 1] if i < len(forest) - 1 else None
+        open(os.path.join(OUT, 'mountain', m['slug'] + '.html'), 'w', encoding='utf-8') \
+            .write(build_mountain(m, prev, nxt, kmap, photos))
+
     # 검색엔진용 — 어떤 주소가 있는지 알려준다
     today = datetime.date.today().isoformat()
     urls = [('', '1.0'), ('app-guide.html', '0.7'), ('guestbook.html', '0.5'), ('credits.html', '0.3')]
-    urls += [(f"mountain/{m['slug']}.html", '0.8') for m in mts]
+    urls += [(f"mountain/{m['slug']}.html", '0.8') for m in mts + forest]
     sitemap = ['<?xml version="1.0" encoding="UTF-8"?>',
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, pri in urls:
@@ -1999,7 +2025,7 @@ def main():
         + (f'#DaumWebMasterTool:{DAUM_PIN}\n' if DAUM_PIN else ''))
 
     written = sum(1 for m in mts if m['content'])
-    print(f'생성 완료: 페이지 {len(mts) + 3}개 (본문 작성 {written}/100)')
+    print(f'생성 완료: 페이지 {len(mts) + len(forest) + 3}개 (본문 작성 {written}/100, 산림청 {len(forest)}곳)')
     print('→', os.path.join(OUT, 'index.html'))
 
 
