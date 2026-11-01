@@ -438,8 +438,10 @@ dl.access dd{margin:0}
 .side.side-flow{position:static}
 /* 레이아웃 시험: 본문을 대표사진과 같은 가로폭으로 펼치고, 지도·정보는 그 위에 가로로 놓는다 */
 .post-body.wide{grid-template-columns:minmax(0,1fr);gap:28px}
-.post-body.wide .side{order:-1;width:300px;max-width:100%;margin-left:auto}
-@media (max-width:900px){.post-body.wide .side{width:100%;margin-left:0}}
+.post-body.wide{display:block;margin-top:14px}
+.post-body.wide .side{float:right;width:300px;max-width:100%;margin:0 0 20px 32px}
+.post-body.wide .main::after{content:"";display:block;clear:both}
+@media (max-width:900px){.post-body.wide .side{float:none;width:100%;margin:0 0 24px}}
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}

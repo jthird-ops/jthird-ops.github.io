@@ -1215,6 +1215,18 @@ def build_mountain(m, prev, nxt, kmap, photos):
     nav += '</nav>'
 
     updated = (c or {}).get('updated', '')
+    wide = m['slug'] in SIDE_FLOW
+    SIDE = f"""<aside class="side{' side-flow' if m['slug'] in SIDE_FLOW else ''}">
+      {side_map(m, kmap)}
+      <div class="fact">
+        <dl>
+          <dt>높이</dt><dd>{e(m['height'])}</dd>
+          <dt>지역</dt><dd>{e(m['region'])}</dd>
+          {'<dt>분류</dt><dd>산림청 100대 명산 (블랙야크 100대에는 없음)</dd>' if m.get('forest') else f"<dt>번호</dt><dd>{m['rank']} / 100</dd>"}
+          <dt>좌표</dt><dd>{m['lat']:.3f}, {m['lon']:.3f}</dd>
+        </dl>
+      </div>
+    </aside>"""
     body = f"""
 <article class="post">
   <div class="post-head">
@@ -1229,18 +1241,9 @@ def build_mountain(m, prev, nxt, kmap, photos):
   {cover}
 
   <div class="post-body{' wide' if m['slug'] in SIDE_FLOW else ''}">
+    {SIDE if wide else ''}
     <div class="main">{main}</div>
-    <aside class="side{' side-flow' if m['slug'] in SIDE_FLOW else ''}">
-      {side_map(m, kmap)}
-      <div class="fact">
-        <dl>
-          <dt>높이</dt><dd>{e(m['height'])}</dd>
-          <dt>지역</dt><dd>{e(m['region'])}</dd>
-          {'<dt>분류</dt><dd>산림청 100대 명산 (블랙야크 100대에는 없음)</dd>' if m.get('forest') else f"<dt>번호</dt><dd>{m['rank']} / 100</dd>"}
-          <dt>좌표</dt><dd>{m['lat']:.3f}, {m['lon']:.3f}</dd>
-        </dl>
-      </div>
-    </aside>
+    {'' if wide else SIDE}
   </div>
   {nav}
 </article>
@@ -1691,8 +1694,10 @@ dl.access dd{margin:0}
 .side.side-flow{position:static}
 /* 레이아웃 시험: 본문을 대표사진과 같은 가로폭으로 펼치고, 지도·정보는 그 위에 가로로 놓는다 */
 .post-body.wide{grid-template-columns:minmax(0,1fr);gap:28px}
-.post-body.wide .side{order:-1;width:300px;max-width:100%;margin-left:auto}
-@media (max-width:900px){.post-body.wide .side{width:100%;margin-left:0}}
+.post-body.wide{display:block;margin-top:14px}
+.post-body.wide .side{float:right;width:300px;max-width:100%;margin:0 0 20px 32px}
+.post-body.wide .main::after{content:"";display:block;clear:both}
+@media (max-width:900px){.post-body.wide .side{float:none;width:100%;margin:0 0 24px}}
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}
