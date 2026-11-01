@@ -1193,7 +1193,7 @@ def build_mountain(m, prev, nxt, kmap, photos):
 
   {cover}
 
-  <div class="post-body">
+  <div class="post-body{' wide' if m['slug'] in SIDE_FLOW else ''}">
     <div class="main">{main}</div>
     <aside class="side{' side-flow' if m['slug'] in SIDE_FLOW else ''}">
       {side_map(m, kmap)}
@@ -1650,6 +1650,11 @@ dl.access dd{margin:0}
 /* 사이드 */
 .side{position:sticky;top:78px;display:flex;flex-direction:column;gap:16px;min-width:0}
 .side.side-flow{position:static}
+/* 레이아웃 시험: 본문을 대표사진과 같은 가로폭으로 펼치고, 지도·정보는 그 위에 가로로 놓는다 */
+.post-body.wide{grid-template-columns:minmax(0,1fr);gap:28px}
+.post-body.wide .side{order:-1;flex-direction:row;flex-wrap:wrap;align-items:stretch}
+.post-body.wide .minimap{flex:2 1 320px}
+.post-body.wide .fact{flex:1 1 240px;align-self:flex-start}
 .minimap{min-width:0}
 .minimap-frame{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
   background:#fff;width:100%;padding:10px}
