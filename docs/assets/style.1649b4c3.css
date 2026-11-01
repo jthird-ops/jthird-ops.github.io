@@ -254,6 +254,10 @@ section h2{font-size:24px;font-weight:750}
 .kmap .prov[data-region="제주도"] path{fill:#f1e6ef}
 
 /* 시도 이름 */
+.kmap .city{fill:#5f6b7a;stroke:#fff;stroke-width:1}
+.kmap .cname{font-size:9.5px;font-weight:600;fill:#4a5562;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round}
+.kmap .ring{fill:rgba(214,69,38,.16);stroke:#d64526;stroke-width:1.4}
+.kmap .mname{font-size:13px;font-weight:800;fill:#b3361b;paint-order:stroke;stroke:#fff;stroke-width:3.4px;stroke-linejoin:round}
 .kmap .plabel{font-family:inherit;font-size:calc(26px * var(--s,1));font-weight:700;fill:#6f7a86;
   text-anchor:middle;dominant-baseline:middle;pointer-events:none;
   paint-order:stroke;stroke:#fff;stroke-width:calc(5px * var(--s,1));stroke-linejoin:round;

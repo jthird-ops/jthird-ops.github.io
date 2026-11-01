@@ -7,7 +7,7 @@
 아니면 /docs 만 게시할 수 있어서, 소스와 사이트를 한 저장소에 두려면
 docs/ 여야 한다.
 """
-import urllib.parse
+import math, urllib.parse
 import json, os, shutil, html, hashlib, datetime, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -938,6 +938,40 @@ def build_credits(mts, photos):
 
 
 # ---------------------------------------------------------------- 개별 산
+# 미니맵에 길잡이로 찍는 주요 도시 (이름, 위도, 경도)
+CITIES = [
+ ("서울", 37.5665, 126.9780), ("인천", 37.4563, 126.7052), ("수원", 37.2636, 127.0286),
+ ("성남", 37.4200, 127.1267), ("과천", 37.4292, 126.9876), ("안양", 37.3943, 126.9568),
+ ("용인", 37.2411, 127.1776), ("의정부", 37.7381, 127.0337), ("춘천", 37.8813, 127.7298),
+ ("원주", 37.3422, 127.9202), ("강릉", 37.7519, 128.8761), ("청주", 36.6424, 127.4890),
+ ("대전", 36.3504, 127.3845), ("전주", 35.8242, 127.1480), ("광주", 35.1595, 126.8526),
+ ("대구", 35.8714, 128.6014), ("울산", 35.5384, 129.3114), ("부산", 35.1796, 129.0756),
+ ("창원", 35.2279, 128.6811), ("포항", 36.0190, 129.3435), ("목포", 34.8118, 126.3922),
+ ("여수", 34.7604, 127.6622), ("제주", 33.4996, 126.5312), ("천안", 36.8151, 127.1139),
+ ("안동", 36.5684, 128.7294), ("속초", 38.2070, 128.5918), ("평택", 36.9921, 127.1128),
+ ("양평", 37.4912, 127.4875), ("하남", 37.5393, 127.2148),
+]
+
+
+def place_marks(m, kmap, win):
+    """길잡이용 도시 점·이름과, 산 이름표. 그림만 봐서는 위치를 가늠하기 어려워서 덧붙였다."""
+    pr = kmap['project']
+    k = math.cos(math.radians(pr['lat0']))
+    out = []
+    for name, lat, lon in CITIES:
+        x = (lon * k - pr['minx']) * pr['scale']
+        y = (-lat - pr['miny']) * pr['scale']
+        if not (win[0] + 8 < x < win[2] - 34 and win[1] + 8 < y < win[3] - 8):
+            continue
+        if abs(x - m['x']) < 24 and abs(y - m['y']) < 24:
+            continue
+        out.append(f'<circle class="city" cx="{x:.1f}" cy="{y:.1f}" r="2.6"/>'
+                   f'<text class="cname" x="{x + 5:.1f}" y="{y + 3.5:.1f}">{e(name)}</text>')
+    out.append(f'<circle class="ring" cx="{m["x"]}" cy="{m["y"]}" r="15"/>'
+               f'<text class="mname" x="{m["x"]}" y="{m["y"] - 21:.1f}" text-anchor="middle">{e(m["name"])}</text>')
+    return '<g class="marks">' + ''.join(out) + '</g>'
+
+
 def minimap(m, kmap):
     """해당 산 주변만 확대해 보여주는 SVG. viewBox만 옮기면 되므로 이미지 크롭이 필요 없다."""
     h = ZOOM_W * 0.8
@@ -946,11 +980,12 @@ def minimap(m, kmap):
     win = (x0, y0, x0 + ZOOM_W, y0 + h)          # 이 창에 걸치는 폴리곤만 그린다
     shapes = ''.join(f'<path d="{d}"/>' for d in kmap['paths'] if visible(d, win))
     provs, _ = provinces_svg(kmap, win=win)
+    pins = place_marks(m, kmap, win) if m['slug'] in SIDE_FLOW else ''
     return (f'<svg class="kmap zoom" data-region="{e(m["region"])}" viewBox="{vb}" '
             f'width="{ZOOM_W}" height="{h:.0f}" role="img" '
             f'aria-label="{e(m["name"])} 위치"><g class="land">{shapes}</g>'
             f'<g class="provs">{provs}</g>'
-            f'<circle class="here" cx="{m["x"]}" cy="{m["y"]}" r="8"/></svg>')
+            f'{pins}<circle class="here" cx="{m["x"]}" cy="{m["y"]}" r="8"/></svg>')
 
 
 def section(title, inner):
@@ -1472,6 +1507,10 @@ section h2{font-size:24px;font-weight:750}
 .kmap .prov[data-region="제주도"] path{fill:#f1e6ef}
 
 /* 시도 이름 */
+.kmap .city{fill:#5f6b7a;stroke:#fff;stroke-width:1}
+.kmap .cname{font-size:9.5px;font-weight:600;fill:#4a5562;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round}
+.kmap .ring{fill:rgba(214,69,38,.16);stroke:#d64526;stroke-width:1.4}
+.kmap .mname{font-size:13px;font-weight:800;fill:#b3361b;paint-order:stroke;stroke:#fff;stroke-width:3.4px;stroke-linejoin:round}
 .kmap .plabel{font-family:inherit;font-size:calc(26px * var(--s,1));font-weight:700;fill:#6f7a86;
   text-anchor:middle;dominant-baseline:middle;pointer-events:none;
   paint-order:stroke;stroke:#fff;stroke-width:calc(5px * var(--s,1));stroke-linejoin:round;
