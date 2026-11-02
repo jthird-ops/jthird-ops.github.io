@@ -838,5 +838,14 @@
   "source": "",
   "own": true,
   "date": ""
+ },
+ "점봉산": {
+  "file": "점봉산.jpg",
+  "title": "점봉산 산림유전자원보호구역 안내도",
+  "author": "산림청",
+  "license": "이용자 제공 자료",
+  "license_url": "",
+  "source": "https://www.forest.go.kr",
+  "provider": "산림생태관리센터"
  }
 }
