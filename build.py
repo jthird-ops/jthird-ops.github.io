@@ -1644,7 +1644,8 @@ section h2{font-size:24px;font-weight:750}
 .lg-grid figure{margin:0}
 .lg-grid figure:only-child{grid-column:1/-1}
 .lg-grid figure:only-child img{aspect-ratio:auto;width:100%;max-height:560px;object-fit:contain;margin:0 auto}
-.lg-grid img{aspect-ratio:4/3;object-fit:cover}
+.lg-grid{align-items:start}
+.lg-grid img{aspect-ratio:auto;height:auto;object-fit:contain}
 .lg-verdict{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);text-align:center}
 .lg-stars{color:#d9a441;font-size:20px;letter-spacing:2px}
 .lg-verdict p{margin:6px 0 0}
