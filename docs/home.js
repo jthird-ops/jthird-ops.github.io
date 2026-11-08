@@ -67,6 +67,6 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
   btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
   /* autoplay is blocked until a gesture: resume on first touch if the visitor had it on */
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
-  if(pref==="1"){ ["pointerdown","keydown","scroll"].forEach(e=>addEventListener(e,()=>{ if(!on&&!ctx) start(); },{once:true,passive:true})); }
+  if(pref==="1"){ ["pointerdown","keydown","scroll"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!ctx&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
   document.addEventListener("visibilitychange",()=>{ if(!ctx||!on) return; document.hidden?ctx.suspend():ctx.resume(); });
 })();
