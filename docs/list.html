@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전체 100대 명산 · 블랙야크 100대 명산 기록</title>
+<meta name="description" content="블랙야크 100대명산 100개 산의 높이, 지역, 코스 메모, 대표사진과 완등 기록. 지역·완등 여부·이름으로 찾아보세요.">
+<meta name="theme-color" content="#0a0d16">
+<style>
+html,body{background:#0a0d16;color:#f2eee7}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0d16'/%3E%3Cpath d='M3 25 12 9l5 8 3-4 9 12z' fill='%23ffb877'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav" aria-label="주요 메뉴">
+  <a class="logo" href="index.html">100대 명산<sup>BAC</sup></a>
+  <div class="nl">
+  <a class="l" href="list.html" aria-current="page">전체 목록</a>
+  <a class="l" href="record.html">내 기록</a>
+  <a class="l" href="guide.html">완등 기록 어플</a>
+  <a class="l" href="forest.html">산림청 명산</a>
+  <a class="l" href="map.html">지도</a>
+  </div>
+  <a class="cta" href="list.html">산 찾기</a>
+</header>
+
+<main class="page">
+<section>
+  <div class="wrap">
+    <div class="pagehead reveal">
+      <div class="label">All 100</div>
+      <h2>전체 <em>100대 명산</em></h2>
+    </div>
+    <div class="tools reveal">
+      <div class="chips" id="chips" role="group" aria-label="지역 필터"></div>
+      <div class="bar">
+        <label class="search"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.2 3.2"/></svg>
+          <input id="q" type="search" placeholder="산 이름 검색 (예: 설악, 지리)" autocomplete="off" aria-label="산 이름 검색"></label>
+        <div class="seg" id="stat" role="group" aria-label="완등 여부">
+          <button data-v="all" aria-pressed="true">전체</button>
+          <button data-v="done" aria-pressed="false">완등</button>
+          <button data-v="todo" aria-pressed="false">미완등</button>
+        </div>
+        <div class="seg" id="sort" role="group" aria-label="정렬">
+          <button data-v="no" aria-pressed="true">가나다순</button>
+          <button data-v="h" aria-pressed="false">높은 순</button>
+        </div>
+      </div>
+    </div>
+    <p class="count" id="count" aria-live="polite"></p>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>조건에 맞는 산이 없습니다.</p>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="foot2">
+      <div class="big">다음 산은 <em>어디</em>일까요.</div>
+      <nav class="fnav" aria-label="페이지">
+        <a href="index.html">홈</a><a href="list.html">전체 목록</a><a href="record.html">내 기록</a><a href="guide.html">완등 기록 어플</a><a href="forest.html">산림청 명산</a><a href="map.html">지도</a>
+      </nav>
+    </div>
+    <nav class="fl" style="margin-top:28px" aria-label="원본 블로그">
+      <a href="https://jthird-ops.github.io/#tab-map" target="_blank" rel="noopener">지도 ↗</a>
+      <a href="https://jthird-ops.github.io/guestbook.html" target="_blank" rel="noopener">방명록 ↗</a>
+      <a href="https://jthird-ops.github.io/credits.html" target="_blank" rel="noopener">사진 출처 ↗</a>
+    </nav>
+    <p class="warn">블랙야크 100대 명산 기록 · 산 데이터 100건. 코스·시간·교통 정보는 작성 시점 기준입니다. 산행 전 국립공원공단·지자체 공지와 기상 상황을 반드시 확인하세요. 산 사진과 각 산의 상세 코스는 원본 블로그에서 가져옵니다.</p>
+  </div>
+</footer>
+<script src="data.js"></script>
+<script src="common.js"></script>
+<script src="list.js"></script>
+</body>
+</html>

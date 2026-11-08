@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 기록 · 블랙야크 100대 명산 기록</title>
+<meta name="description" content="100대 명산 도장첩과 월별 산행 타임라인. 올라간 산에는 도장이 찍힙니다.">
+<meta name="theme-color" content="#0a0d16">
+<style>
+html,body{background:#0a0d16;color:#f2eee7}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0d16'/%3E%3Cpath d='M3 25 12 9l5 8 3-4 9 12z' fill='%23ffb877'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav" aria-label="주요 메뉴">
+  <a class="logo" href="index.html">100대 명산<sup>BAC</sup></a>
+  <div class="nl">
+  <a class="l" href="list.html">전체 목록</a>
+  <a class="l" href="record.html" aria-current="page">내 기록</a>
+  <a class="l" href="guide.html">완등 기록 어플</a>
+  <a class="l" href="forest.html">산림청 명산</a>
+  <a class="l" href="map.html">지도</a>
+  </div>
+  <a class="cta" href="list.html">산 찾기</a>
+</header>
+
+<main class="page">
+<section>
+  <div class="wrap">
+    <div class="pagehead reveal">
+      <div class="label">My Record</div>
+      <h2>100개의 도장, <em id="hStamp">27개 찍음.</em></h2>
+      <p class="lede">100대 명산을 지역 순으로 늘어놓은 도장첩입니다. 올라간 산에는 도장이 찍히고, 칸을 누르면 목록의 해당 산으로 이동합니다.</p>
+    </div>
+    <div class="sumrow reveal" id="sum"></div>
+    <div class="chips rchips reveal" id="rchips" role="group" aria-label="지역 강조"></div>
+    <div class="stampbook" id="book" role="list"></div>
+    <div class="legend2"><span><i class="lg done"></i>완등(찍은 도장)</span><span><i class="lg"></i>아직 못 오른 산</span><span class="hint">칸 안의 숫자는 해발고도입니다</span></div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">Rhythm</div>
+      <h2>산행의 <em>리듬</em></h2>
+      <p class="lede" id="tlLede"></p>
+    </div>
+    <div class="tl reveal" id="tl" aria-label="월별 완등 타임라인"></div>
+    <div class="legend2"><span><i class="dotlg"></i>첫 완등</span><span><i class="dotlg rev"></i>다시 오른 산</span><span class="hint">점을 누르면 해당 산으로 이동합니다</span></div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="foot2">
+      <div class="big">다음 산은 <em>어디</em>일까요.</div>
+      <nav class="fnav" aria-label="페이지">
+        <a href="index.html">홈</a><a href="list.html">전체 목록</a><a href="record.html">내 기록</a><a href="guide.html">완등 기록 어플</a><a href="forest.html">산림청 명산</a><a href="map.html">지도</a>
+      </nav>
+    </div>
+    <nav class="fl" style="margin-top:28px" aria-label="원본 블로그">
+      <a href="https://jthird-ops.github.io/#tab-map" target="_blank" rel="noopener">지도 ↗</a>
+      <a href="https://jthird-ops.github.io/guestbook.html" target="_blank" rel="noopener">방명록 ↗</a>
+      <a href="https://jthird-ops.github.io/credits.html" target="_blank" rel="noopener">사진 출처 ↗</a>
+    </nav>
+    <p class="warn">블랙야크 100대 명산 기록 · 산 데이터 100건. 코스·시간·교통 정보는 작성 시점 기준입니다. 산행 전 국립공원공단·지자체 공지와 기상 상황을 반드시 확인하세요. 산 사진과 각 산의 상세 코스는 원본 블로그에서 가져옵니다.</p>
+  </div>
+</footer>
+<script src="data.js"></script>
+<script src="common.js"></script>
+<script src="record.js"></script>
+</body>
+</html>
