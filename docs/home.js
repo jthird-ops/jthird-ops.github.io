@@ -31,24 +31,29 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
 (function(){
   const btn=document.getElementById("snd"); if(!btn) return;
   let ctx,master,timer,on=false,step=0;
-  const CH=[[220,261.63,329.63,392],[174.61,220,261.63,329.63],[196,246.94,293.66,392],[164.81,207.65,246.94,329.63]];
+  const CH=[[261.63,329.63,392,493.88],[196,246.94,293.66,392],[220,261.63,329.63,392],[174.61,220,261.63,329.63]],ARP=[[523.25,659.25,783.99,987.77],[392,493.88,587.33,783.99],[440,523.25,659.25,783.99],[349.23,440,523.25,659.25]];
   function note(f,t,d){
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.type="sine";o.frequency.value=f;o.detune.value=(Math.random()-.5)*8;
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+d*.35);g.gain.linearRampToValueAtTime(0,t+d);
     o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.1);
   }
+  function bell(f,t){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";o.frequency.value=f;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.03);g.gain.exponentialRampToValueAtTime(.0005,t+3);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+3.1);
+  }
   function bar(){
     const t=ctx.currentTime,c=CH[step%CH.length],d=8;
-    c.forEach((f,i)=>note(f,t+i*.4,d)); note(c[0]/2,t,d);
-    if(step%2===0) note(c[3]*2,t+3,4);
+    c.forEach((f,i)=>note(f,t+i*.4,d));
+    const a=ARP[step%ARP.length]; [0,1,2,3,2,1].forEach((k,i)=>bell(a[k],t+1+i*1.1));
     step++;
   }
   function start(){
     if(!ctx){
       ctx=new (window.AudioContext||window.webkitAudioContext)();
       master=ctx.createGain();master.gain.value=0;
-      const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=1400;
+      const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=3200;
       const dl=ctx.createDelay(1);dl.delayTime.value=.45;const fb=ctx.createGain();fb.gain.value=.45;
       dl.connect(fb);fb.connect(dl);
       master.connect(lp);lp.connect(ctx.destination);lp.connect(dl);dl.connect(ctx.destination);
