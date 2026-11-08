@@ -27,51 +27,17 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
 })();
 
 
-/* ambient music: synthesized soft pad (Web Audio, no files) */
+/* background music (bgm.mp3, loop, fade-in) */
 (function(){
   const btn=document.getElementById("snd"); if(!btn) return;
-  let ctx,master,timer,on=false,step=0;
-  const CH=[[261.63,329.63,392,493.88],[196,246.94,293.66,392],[220,261.63,329.63,392],[174.61,220,261.63,329.63]],ARP=[[523.25,659.25,783.99,987.77],[392,493.88,587.33,783.99],[440,523.25,659.25,783.99],[349.23,440,523.25,659.25]];
-  function note(f,t,d){
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.type="sine";o.frequency.value=f;o.detune.value=(Math.random()-.5)*8;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+d*.35);g.gain.linearRampToValueAtTime(0,t+d);
-    o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.1);
-  }
-  function bell(f,t){
-    const o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";o.frequency.value=f;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.03);g.gain.exponentialRampToValueAtTime(.0005,t+3);
-    o.connect(g);g.connect(master);o.start(t);o.stop(t+3.1);
-  }
-  function bar(){
-    const t=ctx.currentTime,c=CH[step%CH.length],d=8;
-    c.forEach((f,i)=>note(f,t+i*.4,d));
-    const a=ARP[step%ARP.length]; [0,1,2,3,2,1].forEach((k,i)=>bell(a[k],t+1+i*1.1));
-    step++;
-  }
-  function start(){
-    if(!ctx){
-      ctx=new (window.AudioContext||window.webkitAudioContext)();
-      master=ctx.createGain();master.gain.value=0;
-      const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=3200;
-      const dl=ctx.createDelay(1);dl.delayTime.value=.45;const fb=ctx.createGain();fb.gain.value=.45;
-      dl.connect(fb);fb.connect(dl);
-      master.connect(lp);lp.connect(ctx.destination);lp.connect(dl);dl.connect(ctx.destination);
-    }
-    ctx.resume().then(ui);
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.linearRampToValueAtTime(1,ctx.currentTime+3);
-    bar();timer=setInterval(bar,7000);on=true;ui();
-  }
-  function stop(){
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0,ctx.currentTime+1);
-    clearInterval(timer);setTimeout(()=>{ if(!on) ctx.suspend(); },1200);on=false;ui();
-  }
+  const au=new Audio("bgm.mp3"); au.loop=true; au.preload="none"; au.volume=0;
+  const VOL=.5; let on=false, fade;
+  function ramp(to,done){ clearInterval(fade); fade=setInterval(()=>{ const d=to-au.volume; if(Math.abs(d)<.03){ au.volume=to; clearInterval(fade); done&&done(); } else au.volume=Math.max(0,Math.min(1,au.volume+Math.sign(d)*.03)); },60); }
   function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span:last-child").textContent=on?"음악 끄기":"음악 켜기";}
-  btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} if(on&&ctx.state!=="running"){ ctx.resume(); return; } on?stop():start(); });
-  /* autoplay is blocked until a gesture: resume on first touch if the visitor had it on */
+  function start(){ on=true; ui(); const r=au.play(); if(r&&r.catch) r.catch(()=>{ on=false; ui(); }); ramp(VOL); }
+  function stop(){ on=false; ui(); ramp(0,()=>au.pause()); }
+  btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
-  if(pref==="1"){ ["pointerdown","keydown"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!ctx&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
-  document.addEventListener("visibilitychange",()=>{ if(!ctx||!on) return; document.hidden?ctx.suspend():ctx.resume(); });
+  if(pref==="1"){ ["pointerdown","keydown"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
+  document.addEventListener("visibilitychange",()=>{ if(!on) return; document.hidden?au.pause():au.play().catch(()=>{}); });
 })();
