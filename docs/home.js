@@ -63,7 +63,7 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
     master.gain.linearRampToValueAtTime(0,ctx.currentTime+1);
     clearInterval(timer);setTimeout(()=>{ if(!on) ctx.suspend(); },1200);on=false;ui();
   }
-  function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span").textContent=on?"음악 끄기":"음악 켜기";}
+  function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span:last-child").textContent=on?"음악 끄기":"음악 켜기";}
   btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
   /* autoplay is blocked until a gesture: resume on first touch if the visitor had it on */
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
