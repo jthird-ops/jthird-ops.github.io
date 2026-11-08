@@ -187,7 +187,6 @@ footer{margin-top:clamp(96px,12vw,168px);border-top:1px solid var(--line);paddin
 @media(max-height:720px){h1{font-size:clamp(40px,7.6vw,96px)}.hero .in{gap:22px}}
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .rise,.nav{animation:none}
   .reveal{opacity:1;transform:none;transition:none}
   .card,.rt,.btn{transition:none}
 }
