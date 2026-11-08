@@ -6,12 +6,12 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
   const A=$("#bgv"), B=$("#bgv2"), FADE=1.6;
   let cur=A, nxt=B, ready=false, swapping=false;
   function start(){ if(ready) return; ready=true; A.classList.add("on"); A.play().catch(()=>{}); }
-  A.addEventListener("loadeddata",start); if(A.readyState>=2) start();
+  A.addEventListener("loadeddata",start);A.addEventListener("playing",()=>{ if(B.preload!=="auto"){ B.preload="auto"; B.load(); } },{once:true}); if(A.readyState>=2) start();
     function swap(){
     swapping=true;
     nxt.currentTime=0;
     nxt.play().catch(()=>{});
-    nxt.classList.add("on");
+    nxt.classList.add("on");A.classList.add("sw");
     cur.classList.remove("on");
     const old=cur; cur=nxt; nxt=old;
     setTimeout(()=>{ nxt.pause(); nxt.currentTime=0; swapping=false; }, FADE*1000+200);
