@@ -53,7 +53,7 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
       dl.connect(fb);fb.connect(dl);
       master.connect(lp);lp.connect(ctx.destination);lp.connect(dl);dl.connect(ctx.destination);
     }
-    ctx.resume();
+    ctx.resume().then(ui);
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.linearRampToValueAtTime(1,ctx.currentTime+3);
     bar();timer=setInterval(bar,7000);on=true;ui();
@@ -64,9 +64,9 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
     clearInterval(timer);setTimeout(()=>{ if(!on) ctx.suspend(); },1200);on=false;ui();
   }
   function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span:last-child").textContent=on?"음악 끄기":"음악 켜기";}
-  btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
+  btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} if(on&&ctx.state!=="running"){ ctx.resume(); return; } on?stop():start(); });
   /* autoplay is blocked until a gesture: resume on first touch if the visitor had it on */
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
-  if(pref==="1"){ ["pointerdown","keydown","scroll"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!ctx&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
+  if(pref==="1"){ ["pointerdown","keydown"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!ctx&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
   document.addEventListener("visibilitychange",()=>{ if(!ctx||!on) return; document.hidden?ctx.suspend():ctx.resume(); });
 })();
