@@ -429,7 +429,7 @@ footer.slim .big{display:none}
     ["P","D"].forEach((k,i)=>{tex(i,imgs[k]);gl.uniform1i(U(k),i);});
     gl.uniform1f(U("MO"),1);
     let et=0,last=0;   /* drift clock: advances only while visible and moving */
-    function size(){const dpr=Math.min(devicePixelRatio||1,2);const w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(U("R"),w,h);}}
+    function size(){const dpr=Math.min(devicePixelRatio||1,innerWidth<760?1.5:2);const w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(U("R"),w,h);}}
     function frame(now){
       size();
       if(!last) last=now;
