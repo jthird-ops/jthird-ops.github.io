@@ -286,3 +286,11 @@ footer.slim .big{display:none}
 
 .hero.kb .bgv.on{animation:kb 22s ease-in-out infinite alternate;transform-origin:50% 60%}
 @keyframes kb{from{transform:scale(1)}to{transform:scale(1.1) translate3d(-1.2%,-.8%,0)}}
+
+/* red seal for climbed mountains */
+.cell.done{--seal:#e0322b;background:rgba(224,50,43,.10);box-shadow:inset 0 0 0 1px rgba(224,50,43,.45)}
+.cell.done:hover{background:rgba(224,50,43,.18)}
+.cell.done .ht{color:rgba(255,122,112,.85)}
+.cell.done .dt{color:#ff7a70}
+.cell.done::before{content:"登頂";display:grid;place-items:center;right:5px;bottom:5px;width:46%;max-width:44px;aspect-ratio:1;border-radius:50%;border:2px solid var(--seal);box-shadow:inset 0 0 0 2px rgba(224,50,43,.0),inset 0 0 0 3px rgba(224,50,43,.55);color:var(--seal);font-family:var(--serif);font-weight:700;font-size:10px;letter-spacing:-.05em;line-height:1;transform:rotate(-14deg);opacity:.92;mix-blend-mode:normal;background:transparent;z-index:0}
+@media(max-width:560px){.cell.done::before{font-size:8px;border-width:1.5px;right:4px;bottom:4px}}
