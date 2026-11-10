@@ -3,7 +3,9 @@ $("#sDone").innerHTML = doneList.length + "<small>/100</small>";
 $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<small>km</small>";
 (function(){
   /* hero: the clip plays, then the Huiyangsan photo drifts by depth, then back — on a loop */
-  const A=$("#bgv"), cv=$("#gl"), FADE=1.6, HOLD=32;
+  const A=$("#bgv"), cv=$("#gl"), FADE=1.6;
+  let HOLD=14;                     /* seconds of parallax; matched to the clip once it is known */
+  A.addEventListener("loadedmetadata",()=>{ if(A.duration>1) HOLD=Math.min(Math.max(A.duration,8),18); });
   const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
   A.muted=true; A.defaultMuted=true; A.setAttribute("muted",""); A.setAttribute("playsinline","");
   const kick=()=>A.play().catch(()=>{});
