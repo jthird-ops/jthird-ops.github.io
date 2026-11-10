@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>이어지는 홈 화면 샘플</title>
-<meta name="description" content="현재 홈 영상이 한 번 재생된 뒤 희양산 깊이 애니메이션으로 이어지는 홈 화면 샘플.">
+<title>두 화면 로테이션 샘플</title>
+<meta name="description" content="현재 홈 영상과 희양산 깊이 애니메이션이 번갈아 재생되는 홈 화면 샘플.">
 <meta name="theme-color" content="#0a0d16">
 <meta name="robots" content="noindex,nofollow">
 <style>html,body{background:#0a0d16;color:#f2eee7}</style>
@@ -369,7 +369,7 @@ footer.slim .big{display:none}
   </div>
 </section>
 </main>
-<div class="cap" role="note"><b>샘플</b><span id="phase">1 · 현재 홈 영상</span><button id="rep" type="button">처음부터</button><button id="still" type="button">정지 보기</button></div>
+<div class="cap" role="note"><b>샘플</b><span id="phase">1 · 현재 홈 영상</span><button id="rep" type="button">전환</button><button id="still" type="button">정지 보기</button></div>
 <script>
 (function(){
   const cv=document.getElementById("gl"), hero=document.getElementById("hero");
@@ -428,48 +428,53 @@ footer.slim .big{display:none}
   function init(){
     ["P","D"].forEach((k,i)=>{tex(i,imgs[k]);gl.uniform1i(U(k),i);});
     gl.uniform1f(U("MO"),1);
-    let t0=performance.now();
+    let et=0,last=0;   /* drift clock: advances only while visible and moving */
     function size(){const dpr=Math.min(devicePixelRatio||1,2);const w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(U("R"),w,h);}}
     function frame(now){
       size();
-      const t=(RM||still)?0:(now-t0)/1000;
+      if(!last) last=now;
+      const dt=Math.min(now-last,50); last=now;
+      if(!(RM||still)) et+=dt/1000;
+      const t=et;
       const T=0.86*Math.sin(t/28*6.2832-1.2)+0.14*Math.sin(t/11.7*6.2832);
       const TY=Math.sin(t/37*6.2832+.8);
       const Z=1.045+0.015*Math.sin(t/46*6.2832);
-      gl.uniform1f(U("T"),T);gl.uniform1f(U("TY"),TY);gl.uniform1f(U("Z"),Z);gl.uniform1f(U("TM"),(RM||still)?40:t);
+      gl.uniform1f(U("T"),T);gl.uniform1f(U("TY"),TY);gl.uniform1f(U("Z"),Z);gl.uniform1f(U("TM"),t+40);
       gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-    /* phase 1: the current hero video plays, then hands over to the parallax */
-    const FADE=1.8; let handed=false, pass=0;
-    const bail=setTimeout(hand,3500);   /* video blocked or slow: go straight to the parallax */
-    const LOOPS=1;               /* how many times the video plays before handing over */
-    function hand(){
-      if(handed) return; handed=true;
+    /* two scenes on a loop: the hero video, then the depth parallax, then back */
+    const FADE=1.8, HOLD=28;      /* HOLD seconds of drift = one full cycle, so it hands back at rest */
+    let phase=0, lit=false, seeking=false;
+    const bail=setTimeout(toParallax,3500);   /* video blocked or slow: start on the parallax */
+    function toParallax(){
+      if(phase===1) return; phase=1;
       clearTimeout(bail);
-      t0=performance.now();      /* restart the drift so it begins from rest */
-      cv.classList.add("on");
+      et=0;                        /* restart the drift from its resting point */
+      cv.classList.add("on"); lit=true;
       vid.classList.remove("on");
       ph.textContent="2 · 희양산 깊이 애니메이션";
-      setTimeout(()=>{ try{ vid.pause(); }catch(e){} },FADE*1000+300);
+      setTimeout(()=>{ if(phase===1){ try{ vid.pause(); }catch(e){} } },FADE*1000+300);
     }
-    vid.addEventListener("playing",()=>{ if(!handed){ clearTimeout(bail); vid.classList.add("on"); ph.textContent="1 · 현재 홈 영상"; } });
-    vid.addEventListener("ended",()=>{ if(++pass>=LOOPS) hand(); else { vid.currentTime=0; vid.play().catch(()=>{}); } });
-    vid.addEventListener("error",hand);
+    function toVideo(){
+      if(phase===0||vid.error||!lit||!vid.duration) return;
+      phase=0;
+      const go=()=>{ seeking=false; vid.play().catch(()=>{}); vid.classList.add("on"); ph.textContent="1 · 현재 홈 영상"; };
+      if(vid.currentTime>0.05){ seeking=true; vid.addEventListener("seeked",go,{once:true}); vid.currentTime=0; } else go();
+    }
+    vid.addEventListener("playing",()=>{ if(phase===0){ clearTimeout(bail); vid.classList.add("on"); ph.textContent="1 · 현재 홈 영상"; } });
+    vid.addEventListener("ended",toParallax);
+    vid.addEventListener("error",toParallax);
     (function watch(){
-      if(!handed){
-        if(vid.duration && pass>=LOOPS-1 && vid.duration-vid.currentTime<=FADE && !vid.paused) hand();
-        requestAnimationFrame(watch);
-      }
+      if(phase===0){
+        if(!seeking && vid.duration && !vid.paused && vid.currentTime>FADE && vid.duration-vid.currentTime<=FADE) toParallax();
+      }else if(et>=HOLD){ toVideo(); }
+      requestAnimationFrame(watch);
     })();
-    vid.play().catch(()=>{ ph.textContent="2 · 희양산 깊이 애니메이션"; });
-    ["touchstart","click"].forEach(e=>addEventListener(e,()=>{ if(!handed && vid.paused) vid.play().catch(()=>{}); },{once:true,passive:true}));
-    document.getElementById("rep").addEventListener("click",()=>{
-      if(vid.error||!vid.duration) return;
-      handed=false; pass=0; vid.currentTime=0; vid.classList.add("on"); cv.classList.remove("on"); ph.textContent="1 · 현재 홈 영상";
-      vid.play().catch(()=>{}); (function w(){ if(!handed){ if(vid.duration && vid.duration-vid.currentTime<=FADE && !vid.paused) hand(); requestAnimationFrame(w);} })();
-    });
+    vid.play().catch(()=>{});
+    ["touchstart","click"].forEach(e=>addEventListener(e,()=>{ if(phase===0 && vid.paused) vid.play().catch(()=>{}); },{once:true,passive:true}));
+    document.getElementById("rep").addEventListener("click",()=>{ if(phase===1) toVideo(); else toParallax(); });
   }
 })();
 </script>
