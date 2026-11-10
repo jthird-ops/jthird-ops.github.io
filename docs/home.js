@@ -24,6 +24,10 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
   /* low-power / autoplay-blocked phones: start on first touch */
   ["touchstart","click","scroll"].forEach(e=>addEventListener(e,()=>{ if(cur.paused) cur.play().catch(()=>{}); },{once:true,passive:true}));
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden && cur.paused) cur.play().catch(()=>{}); });
+  /* autoplay blocked (low-power mode): drift the still frame until the video can play */
+  const hero=document.querySelector(".hero");
+  [A,B].forEach(v=>v.addEventListener("playing",()=>hero.classList.remove("kb")));
+  setTimeout(()=>{ if(cur.paused) hero.classList.add("kb"); },1200);
 })();
 
 

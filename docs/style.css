@@ -283,3 +283,6 @@ footer.slim .big{display:none}
 .visits{margin:10px 0 0!important;font-size:12px;color:var(--sub);opacity:.9}
 .visits{display:block}
 .visits[hidden]{display:none}
+
+.hero.kb .bgv.on{animation:kb 22s ease-in-out infinite alternate;transform-origin:50% 60%}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.1) translate3d(-1.2%,-.8%,0)}}
