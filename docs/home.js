@@ -117,10 +117,21 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
   const btn=document.getElementById("snd"); if(!btn) return;
   const au=new Audio("bgm.mp3"); au.loop=true; au.preload="none"; au.volume=0;
   const VOL=.5; let on=false, fade;
-  function ramp(to,done){ clearInterval(fade); fade=setInterval(()=>{ const d=to-au.volume; if(Math.abs(d)<.03){ au.volume=to; clearInterval(fade); done&&done(); } else au.volume=Math.max(0,Math.min(1,au.volume+Math.sign(d)*.03)); },60); }
+  /* iOS ignores volume changes on an <audio> element, so never wait on the fade to finish */
+  function ramp(to,done){
+    clearInterval(fade);
+    let prev=au.volume, stuck=0, steps=0;
+    const end=()=>{ try{ au.volume=to; }catch(e){} clearInterval(fade); done&&done(); };
+    fade=setInterval(()=>{
+      if(Math.abs(to-au.volume)<.03 || ++steps>40 || stuck>2){ end(); return; }
+      try{ au.volume=Math.max(0,Math.min(1,au.volume+Math.sign(to-au.volume)*.03)); }catch(e){ end(); return; }
+      stuck = Math.abs(au.volume-prev)<.001 ? stuck+1 : 0;
+      prev=au.volume;
+    },60);
+  }
   function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span:last-child").textContent=on?"음악 끄기":"음악 켜기";}
   function start(){ on=true; ui(); const r=au.play(); if(r&&r.catch) r.catch(()=>{ on=false; ui(); }); ramp(VOL); }
-  function stop(){ on=false; ui(); ramp(0,()=>au.pause()); }
+  function stop(){ on=false; ui(); ramp(0,()=>au.pause()); setTimeout(()=>{ if(!on && !au.paused) au.pause(); },1500); }
   btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
   if(pref==="1"){ ["pointerdown","keydown"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
