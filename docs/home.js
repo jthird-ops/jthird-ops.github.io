@@ -24,6 +24,12 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
   /* low-power / autoplay-blocked phones: start on first touch */
   ["touchstart","click","scroll"].forEach(e=>addEventListener(e,()=>{ if(cur.paused) cur.play().catch(()=>{}); },{once:true,passive:true}));
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden && cur.paused) cur.play().catch(()=>{}); });
+  /* force autoplay: iOS/Android may skip loadeddata until play() is requested */
+  [A,B].forEach(v=>{ v.muted=true; v.defaultMuted=true; v.setAttribute("muted",""); v.setAttribute("playsinline",""); });
+  A.addEventListener("canplay",()=>{ start(); if(A.paused) A.play().catch(()=>{}); });
+  A.play().catch(()=>{}); start();
+  let tries=0; const iv=setInterval(()=>{ if(!cur.paused||++tries>12){ clearInterval(iv); return; } cur.play().catch(()=>{}); },500);
+  addEventListener("pageshow",()=>{ if(cur.paused) cur.play().catch(()=>{}); });
   /* autoplay blocked (low-power mode): drift the still frame until the video can play */
   const hero=document.querySelector(".hero");
   [A,B].forEach(v=>v.addEventListener("playing",()=>hero.classList.remove("kb")));
