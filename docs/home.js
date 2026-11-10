@@ -130,9 +130,32 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
     },60);
   }
   function ui(){btn.classList.toggle("on",on);btn.setAttribute("aria-pressed",on);btn.querySelector("span:last-child").textContent=on?"음악 끄기":"음악 켜기";}
-  function start(){ on=true; ui(); const r=au.play(); if(r&&r.catch) r.catch(()=>{ on=false; ui(); }); ramp(VOL); }
-  function stop(){ on=false; ui(); ramp(0,()=>au.pause()); setTimeout(()=>{ if(!on && !au.paused) au.pause(); },1500); }
-  btn.addEventListener("click",()=>{ try{localStorage.setItem("snd",on?"0":"1")}catch(e){} on?stop():start(); });
+  let volOK=null;
+  function canFade(){                      /* iOS: setting volume does nothing, so don't fade there */
+    if(volOK===null){ const v=au.volume, probe=v>.4?.2:.6;
+      try{ au.volume=probe; }catch(e){}
+      volOK=Math.abs(au.volume-probe)<.01;
+      try{ au.volume=v; }catch(e){} }
+    return volOK;
+  }
+  function kill(){ try{ au.pause(); }catch(e){} }
+  function start(){
+    on=true; ui(); clearInterval(fade);
+    const r=au.play();
+    /* a rejected play() does not always mean it is silent — only step back if it really is */
+    if(r&&r.catch) r.catch(()=>{ if(au.paused){ on=false; ui(); } });
+    ramp(VOL);
+  }
+  function stop(){
+    on=false; ui(); clearInterval(fade);
+    if(canFade()) ramp(0,kill); else kill();
+    setTimeout(()=>{ if(!on) kill(); },900);   /* never leave it playing */
+  }
+  btn.addEventListener("click",()=>{
+    const playing = on || !au.paused;        /* trust the audio, not just the flag */
+    try{localStorage.setItem("snd",playing?"0":"1")}catch(e){}
+    playing?stop():start();
+  });
   let pref="1"; try{pref=localStorage.getItem("snd")||"1"}catch(e){}
   if(pref==="1"){ ["pointerdown","keydown"].forEach(e=>addEventListener(e,ev=>{ if(!on&&!(ev.target.closest&&ev.target.closest("#snd"))) start(); },{once:true,passive:true})); }
   document.addEventListener("visibilitychange",()=>{ if(!on) return; document.hidden?au.pause():au.play().catch(()=>{}); });
