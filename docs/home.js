@@ -3,7 +3,7 @@ $("#sDone").innerHTML = doneList.length + "<small>/100</small>";
 $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<small>km</small>";
 (function(){
   /* hero: the clip plays, then the Huiyangsan photo drifts by depth, then back — on a loop */
-  const A=$("#bgv"), cv=$("#gl"), FADE=1.6, HOLD=28;
+  const A=$("#bgv"), cv=$("#gl"), FADE=1.6, HOLD=32;
   const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
   A.muted=true; A.defaultMuted=true; A.setAttribute("muted",""); A.setAttribute("playsinline","");
   const kick=()=>A.play().catch(()=>{});
@@ -93,9 +93,9 @@ $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<sma
       const dt=Math.min(now-last,50); last=now;
       if(!RM) et+=dt/1000;
       const t=et;
-      const T=0.86*Math.sin(t/28*6.2832-1.2)+0.14*Math.sin(t/11.7*6.2832);
-      const TY=Math.sin(t/37*6.2832+.8);
-      const Z=1.045+0.015*Math.sin(t/46*6.2832);
+      const T=0.86*Math.sin(t/16*6.2832-1.2)+0.14*Math.sin(t/6.8*6.2832);
+      const TY=Math.sin(t/21*6.2832+.8);
+      const Z=1.045+0.015*Math.sin(t/27*6.2832);
       gl.uniform1f(U("T"),T);gl.uniform1f(U("TY"),TY);gl.uniform1f(U("Z"),Z);gl.uniform1f(U("TM"),t+40);
       gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
       requestAnimationFrame(frame);
