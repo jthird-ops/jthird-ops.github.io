@@ -2,38 +2,113 @@ const doneList = M.filter(m=>m.done);
 $("#sDone").innerHTML = doneList.length + "<small>/100</small>";
 $("#sAlt").innerHTML = (doneList.reduce((a,m)=>a+m.h,0)/1000).toFixed(1) + "<small>km</small>";
 (function(){
-  /* seamless loop: two copies of the clip crossfade before the end */
-  const A=$("#bgv"), B=$("#bgv2"), FADE=1.6;
-  let cur=A, nxt=B, ready=false, swapping=false;
-  function start(){ if(ready) return; ready=true; A.classList.add("on"); A.play().catch(()=>{}); }
-  A.addEventListener("loadeddata",start);A.addEventListener("playing",()=>{ if(B.preload!=="auto"){ B.preload="auto"; B.load(); } },{once:true}); if(A.readyState>=2) start();
-    function swap(){
-    swapping=true;
-    nxt.currentTime=0;
-    nxt.play().catch(()=>{});
-    nxt.classList.add("on");A.classList.add("sw");
-    cur.classList.remove("on");
-    const old=cur; cur=nxt; nxt=old;
-    setTimeout(()=>{ nxt.pause(); nxt.currentTime=0; swapping=false; }, FADE*1000+200);
+  /* hero: the clip plays, then the Huiyangsan photo drifts by depth, then back — on a loop */
+  const A=$("#bgv"), cv=$("#gl"), FADE=1.6, HOLD=28;
+  const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  A.muted=true; A.defaultMuted=true; A.setAttribute("muted",""); A.setAttribute("playsinline","");
+  const kick=()=>A.play().catch(()=>{});
+  const gl=cv.getContext("webgl",{antialias:false,alpha:false,powerPreference:"high-performance"});
+  if(!gl){                                   /* no WebGL: keep the clip looping as before */
+    A.loop=true; A.addEventListener("playing",()=>A.classList.add("on")); kick();
+    ["touchstart","click","scroll"].forEach(e=>addEventListener(e,()=>{ if(A.paused) kick(); },{once:true,passive:true}));
+    document.addEventListener("visibilitychange",()=>{ if(!document.hidden && A.paused) kick(); });
+    return;
   }
-  function tick(){
-    if(ready && !swapping && cur.duration && !cur.paused && cur.duration-cur.currentTime<=FADE) swap();
-    requestAnimationFrame(tick);
+  const vs=`attribute vec2 p;varying vec2 s;void main(){s=p*.5+.5;gl_Position=vec4(p,0.,1.);}`;
+  const fs=`precision highp float;varying vec2 s;
+  uniform sampler2D P,D;uniform vec2 R;uniform float T,TY,Z,TM,MO;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+  void main(){
+    float ar=R.x/R.y; vec2 sc=ar>=1.?vec2(1.,1./ar):vec2(ar,1.);
+    vec2 fo=ar>=1.?vec2(.5,.58):vec2(.6,.5);
+    vec2 uv=fo+(s-.5)*sc/Z;
+    /* depth-driven parallax: one photo, no cut-outs — near rock slides, far ridges hold */
+    vec2 A=vec2(T*.030,TY*.011);
+    vec2 p=uv;
+    for(int i=0;i<6;i++){
+      float d=texture2D(D,clamp(p,0.,1.)).r;
+      vec2 t=uv-A*pow(max(0.,1.-d),1.6);
+      p=mix(p,t,.75);
+    }
+    vec3 col=texture2D(P,clamp(p,0.,1.)).rgb;
+    /* valley mist, drifting right */
+    vec2 mc=(uv-vec2(.33,.555))/vec2(.17,.062);
+    float em=exp(-dot(mc,mc)*1.6);
+    float m1=fbm(uv*vec2(9.,14.)+vec2(TM*.018,TM*.003));
+    float m2=fbm(uv*vec2(17.,26.)-vec2(TM*.011,0.));
+    float mist=smoothstep(.42,.78,m1*.65+m2*.35)*em*.62;
+    col=mix(col,vec3(.86,.90,.95),mist*MO);
+    /* faint haze band over the far ridges */
+    vec2 hc=(uv-vec2(.6,.63))/vec2(.6,.05);
+    float eh=exp(-dot(hc,hc)*1.2);
+    float hz=smoothstep(.45,.8,fbm(uv*vec2(5.,9.)+vec2(TM*.009,0.)))*eh*.16;
+    col=mix(col,vec3(.72,.80,.90),hz*MO);
+    col=pow(col,vec3(1.04));
+    gl_FragColor=vec4(col,1.);
+  }`;
+  function sh(t,src){const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o;}
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(pr,n);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,1);
+  function tex(unit,img){const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);return t;}
+  const srcs={P:"assets/hero-photo.77264867.jpg",D:"assets/hero-depth.1a8cc027.png"}, imgs={}; let left=2, ready=false;
+  Object.keys(srcs).forEach(k=>{const im=new Image();im.onload=()=>{imgs[k]=im;if(--left===0)init();};im.onerror=()=>{A.loop=true;};im.src=srcs[k];});
+  /* the clip starts right away; the parallax takes over once its textures are in */
+  A.addEventListener("playing",()=>{ if(phase===0){ clearTimeout(bail); A.classList.add("on"); } });
+  A.addEventListener("ended",()=>toParallax());
+  A.addEventListener("error",()=>toParallax());
+  ["touchstart","click","scroll"].forEach(e=>addEventListener(e,()=>{ if(phase===0 && A.paused) kick(); },{once:true,passive:true}));
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden && phase===0 && A.paused) kick(); });
+  kick();
+  let phase=0, lit=false, seeking=false, et=0, last=0, bailed=false;
+  const bail=setTimeout(()=>{ bailed=true; toParallax(); },3500);   /* autoplay blocked or slow: show the parallax */
+  function toParallax(){
+    if(phase===1||!ready) return; phase=1;
+    clearTimeout(bail);
+    et=0;                                /* restart the drift from its resting point */
+    cv.classList.add("on"); lit=true;
+    A.classList.remove("on");
+    setTimeout(()=>{ if(phase===1){ try{ A.pause(); }catch(e){} } },FADE*1000+300);
   }
-  requestAnimationFrame(tick);
-  /* low-power / autoplay-blocked phones: start on first touch */
-  ["touchstart","click","scroll"].forEach(e=>addEventListener(e,()=>{ if(cur.paused) cur.play().catch(()=>{}); },{once:true,passive:true}));
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden && cur.paused) cur.play().catch(()=>{}); });
-  /* force autoplay: iOS/Android may skip loadeddata until play() is requested */
-  [A,B].forEach(v=>{ v.muted=true; v.defaultMuted=true; v.setAttribute("muted",""); v.setAttribute("playsinline",""); });
-  A.addEventListener("canplay",()=>{ start(); if(A.paused) A.play().catch(()=>{}); });
-  A.play().catch(()=>{}); start();
-  let tries=0; const iv=setInterval(()=>{ if(!cur.paused||++tries>12){ clearInterval(iv); return; } cur.play().catch(()=>{}); },500);
-  addEventListener("pageshow",()=>{ if(cur.paused) cur.play().catch(()=>{}); });
-  /* autoplay blocked (low-power mode): drift the still frame until the video can play */
-  const hero=document.querySelector(".hero");
-  [A,B].forEach(v=>v.addEventListener("playing",()=>hero.classList.remove("kb")));
-  setTimeout(()=>{ if(cur.paused) hero.classList.add("kb"); },1200);
+  function toVideo(){
+    if(phase===0||A.error||!lit||!A.duration) return;
+    phase=0;
+    const go=()=>{ seeking=false; kick(); A.classList.add("on"); };
+    if(A.currentTime>0.05){ seeking=true; A.addEventListener("seeked",go,{once:true}); A.currentTime=0; } else go();
+  }
+  function init(){
+    ["P","D"].forEach((k,i)=>{tex(i,imgs[k]);gl.uniform1i(U(k),i);});
+    gl.uniform1f(U("MO"),1); ready=true;
+    function size(){const dpr=Math.min(devicePixelRatio||1,innerWidth<760?1.5:2);const w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(U("R"),w,h);}}
+    function frame(now){
+      size();
+      if(!last) last=now;
+      const dt=Math.min(now-last,50); last=now;
+      if(!RM) et+=dt/1000;
+      const t=et;
+      const T=0.86*Math.sin(t/28*6.2832-1.2)+0.14*Math.sin(t/11.7*6.2832);
+      const TY=Math.sin(t/37*6.2832+.8);
+      const Z=1.045+0.015*Math.sin(t/46*6.2832);
+      gl.uniform1f(U("T"),T);gl.uniform1f(U("TY"),TY);gl.uniform1f(U("Z"),Z);gl.uniform1f(U("TM"),t+40);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    (function watch(){
+      if(phase===0){
+        if(!seeking && A.duration && !A.paused && A.currentTime>FADE && A.duration-A.currentTime<=FADE) toParallax();
+      }else if(!RM && et>=HOLD){ toVideo(); }
+      requestAnimationFrame(watch);
+    })();
+    if(bailed && !A.classList.contains("on")) toParallax();   /* clip never started */
+  }
 })();
 
 
