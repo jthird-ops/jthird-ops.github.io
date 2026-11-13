@@ -263,3 +263,8 @@
   .ct td[data-l]{display:flex;gap:12px;align-items:baseline;padding:3px 0}
   .ct td[data-l]::before{content:attr(data-l);flex:none;min-width:48px;font-size:11px;letter-spacing:.12em;color:var(--fg-40)}
 }
+
+/* sub-heading above a second table inside a row body */
+.cth{margin-top:36px;font-size:15px;font-weight:500;letter-spacing:-.02em;color:var(--fg-80)}
+.cth+.ct{margin-top:14px}
+.ct td[data-l="거리"],.ct td[data-l="편도"]{white-space:nowrap}
