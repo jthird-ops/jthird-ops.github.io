@@ -268,3 +268,46 @@
 .cth{margin-top:36px;font-size:15px;font-weight:500;letter-spacing:-.02em;color:var(--fg-80)}
 .cth+.ct{margin-top:14px}
 .ct td[data-l="거리"],.ct td[data-l="편도"]{white-space:nowrap}
+
+/* ---- 방명록 ---- */
+.gbform{margin-top:40px;max-width:46rem;padding:26px;border-radius:24px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.gbform input,.gbform textarea{display:block;width:100%;font:inherit;font-size:15px;color:var(--fg);background:rgba(242,238,231,.04);border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:14px;padding:13px 15px;transition:box-shadow .2s}
+.gbform input::placeholder,.gbform textarea::placeholder{color:var(--fg-40)}
+.gbform input:focus,.gbform textarea:focus{outline:0;box-shadow:inset 0 0 0 1px var(--accent)}
+.gbform textarea{margin-top:10px;resize:vertical;min-height:112px;line-height:1.7}
+.gbform #gb-trap{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.gbbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}
+.gbcount{font-size:12px;letter-spacing:.04em;color:var(--fg-40)}
+.gbcount b{color:var(--fg-60);font-weight:500}
+.gbform button{font:inherit;font-size:14px;font-weight:500;color:#0a0d16;background:var(--fg);border:0;border-radius:999px;padding:11px 26px;cursor:pointer;transition:transform .25s var(--ease),opacity .2s}
+.gbform button:hover{transform:translateY(-1px)}
+.gbform button:disabled{opacity:.45;cursor:default;transform:none}
+.gbnote{margin-top:14px;font-size:13.5px;color:var(--accent)}
+.gbnote.bad{color:#ff9b8a}
+.gblist{margin-top:44px;max-width:46rem}
+.gblist ul{list-style:none;margin:0;padding:0}
+.gblist li{padding:22px 0;border-top:1px solid var(--line)}
+.gblist li:first-child{border-top:0;padding-top:0}
+.gbhead{display:flex;align-items:baseline;gap:12px}
+.gbhead b{font-size:15px;font-weight:500}
+.gbhead span{font-size:12px;letter-spacing:.04em;color:var(--fg-40)}
+.gblist p{margin:10px 0 0;font-size:15px;line-height:1.75;color:var(--fg-80);white-space:pre-wrap;word-break:break-word}
+.gbempty{margin:0;font-size:14px;color:var(--fg-40)}
+
+/* ---- 사진 출처 ---- */
+.credsum{margin-top:18px;max-width:40rem;font-size:13px;line-height:1.9;color:var(--fg-40)}
+.credits{margin-top:48px;max-width:62rem}
+.cred-group+.cred-group{margin-top:44px}
+.cred-group h2{max-width:none;margin-top:0;letter-spacing:-.02em;font-size:17px;font-weight:500;letter-spacing:-.02em;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.cred-group h2 span{margin-left:10px;font-size:12px;font-weight:400;letter-spacing:.1em;color:var(--fg-40)}
+.credit-list{list-style:none;margin:0;padding:0}
+.credit-list li{padding:11px 0;font-size:14px;line-height:1.7;color:var(--fg-60);border-bottom:1px solid rgba(242,238,231,.06)}
+.credit-list li:last-child{border-bottom:0}
+.credit-list b{font-weight:500;color:var(--fg)}
+.credit-list a{color:var(--fg-80);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.credit-list a:hover{color:var(--accent);text-decoration-color:var(--accent)}
+.c-title{color:var(--fg-60)}
+@media(max-width:640px){
+  .gbform{padding:20px}
+  .credit-list li{font-size:13.5px}
+}
