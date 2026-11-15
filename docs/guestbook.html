@@ -81,7 +81,7 @@ function card(e) {
   const h = document.createElement('div');
   h.className = 'gbhead';
   const b = document.createElement('b'); b.textContent = e.name || '익명';
-  const t = document.createElement('span'); t.textContent = when(e.at);
+  const t = document.createElement('span'); t.textContent = when(e.createdAt);
   h.append(b, t);
   const p = document.createElement('p');
   p.textContent = e.message || '';          // 글은 언제나 글자로만 넣는다
@@ -91,7 +91,7 @@ function card(e) {
 
 async function load() {
   try {
-    const snap = await getDocs(query(col, orderBy('at', 'desc'), limit(100)));
+    const snap = await getDocs(query(col, orderBy('createdAt', 'desc'), limit(100)));
     const ul = document.createElement('ul');
     snap.forEach((d) => ul.append(card(d.data())));
     list.textContent = '';
@@ -118,7 +118,7 @@ form.addEventListener('submit', async (ev) => {
   const btn = $('gb-send');
   btn.disabled = true;
   try {
-    await addDoc(col, { name: name.slice(0, 20), message: message.slice(0, 500), at: serverTimestamp() });
+    await addDoc(col, { name: name.slice(0, 20), message: message.slice(0, 500), createdAt: serverTimestamp() });
     form.reset(); left.textContent = '500';
     say('남겼습니다. 고맙습니다.');
     load();
